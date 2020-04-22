@@ -40,6 +40,7 @@
   DEFINE CRYPTO_PROTOCOL_SUPPORT      = FALSE
   DEFINE SD_MMC_TIMEOUT               = 1000000
   DEFINE USE_CBMEM_FOR_CONSOLE        = FALSE
+  DEFINE USE_PLATFORM_GOP             = FALSE
   DEFINE BOOTSPLASH_IMAGE             = FALSE
   DEFINE NVME_ENABLE                  = TRUE
   DEFINE CAPSULE_SUPPORT              = FALSE
@@ -803,7 +804,13 @@
 !if $(DISABLE_SERIAL_TERMINAL) == FALSE
   MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
 !endif
+
+!if $(USE_PLATFORM_GOP) == TRUE
+  UefiPayloadPkg/PlatformGopPolicy/PlatformGopPolicy.inf
+!else
   UefiPayloadPkg/GraphicsOutputDxe/GraphicsOutputDxe.inf
+!endif
+
 !if $(PERFORMANCE_MEASUREMENT_ENABLE)
   MdeModulePkg/Universal/Acpi/FirmwarePerformanceDataTableDxe/FirmwarePerformanceDxe.inf
 !endif
