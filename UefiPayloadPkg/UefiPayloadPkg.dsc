@@ -116,6 +116,7 @@
   #
   # User interface options
   #
+  DEFINE USE_PLATFORM_GOP             = FALSE
   DEFINE BOOTSPLASH_IMAGE             = FALSE
   DEFINE BOOT_MANAGER_ESCAPE          = FALSE
   DEFINE PLATFORM_BOOT_TIMEOUT        = 3
@@ -1122,7 +1123,13 @@
 !if $(DISABLE_SERIAL_TERMINAL) == FALSE
   MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
 !endif
+
+!if $(USE_PLATFORM_GOP) == TRUE
+  UefiPayloadPkg/PlatformGopPolicy/PlatformGopPolicy.inf
+!else
   UefiPayloadPkg/GraphicsOutputDxe/GraphicsOutputDxe.inf
+!endif
+
 !if $(PERFORMANCE_MEASUREMENT_ENABLE)
   MdeModulePkg/Universal/Acpi/FirmwarePerformanceDataTableDxe/FirmwarePerformanceDxe.inf
 !endif
