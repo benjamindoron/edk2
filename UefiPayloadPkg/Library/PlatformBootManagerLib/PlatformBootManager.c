@@ -293,13 +293,8 @@ PlatformBootManagerAfterConsole (
   VOID
   )
 {
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  Black;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  White;
   EDKII_PLATFORM_LOGO_PROTOCOL   *PlatformLogo;
   EFI_STATUS                     Status;
-
-  Black.Blue = Black.Green = Black.Red = Black.Reserved = 0;
-  White.Blue = White.Green = White.Red = White.Reserved = 0xFF;
 
   Status = gBS->LocateProtocol (&gEdkiiPlatformLogoProtocolGuid, NULL, (VOID **)&PlatformLogo);
 
@@ -315,26 +310,6 @@ PlatformBootManagerAfterConsole (
   // Register UEFI Shell
   //
   PlatformRegisterFvBootOption (&gUefiShellFileGuid, L"UEFI Shell", LOAD_OPTION_ACTIVE);
-
-  if (FixedPcdGetBool (PcdBootManagerEscape)) {
-    BootLogoUpdateProgress (
-      White,
-      Black,
-      L"Esc or Down to enter Boot Manager Menu, Enter to boot directly",
-      White,
-      0,
-      0
-      );
-  } else {
-    BootLogoUpdateProgress (
-      White,
-      Black,
-      L"F2 or Down to enter Boot Manager Menu, Enter to boot directly",
-      White,
-      0,
-      0
-      );
-  }
 }
 
 /**
@@ -348,7 +323,43 @@ PlatformBootManagerWaitCallback (
   UINT16  TimeoutRemain
   )
 {
-  return;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Black;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  White;
+  UINT16                               TimeoutInitial;
+
+  TimeoutInitial = PcdGet16 (PcdPlatformBootTimeOut);
+
+  //
+  // If PcdPlatformBootTimeOut is set to zero, then we consider
+  // that no progress update should be enacted (since we'd only
+  // ever display a one-shot progress of either 0% or 100%).
+  //
+  if (TimeoutInitial == 0) {
+    return;
+  }
+
+  Black.Raw = 0x00000000;
+  White.Raw = 0x00FFFFFF;
+
+  if (FixedPcdGetBool (PcdBootManagerEscape)) {
+    BootLogoUpdateProgress (
+      White.Pixel,
+      Black.Pixel,
+      L"Esc or Down to enter Boot Manager Menu, Enter to boot directly",
+      White.Pixel,
+      (TimeoutInitial - TimeoutRemain) * 100 / TimeoutInitial,
+      0
+      );
+  } else {
+    BootLogoUpdateProgress (
+      White.Pixel,
+      Black.Pixel,
+      L"F2 or Down to enter Boot Manager Menu, Enter to boot directly",
+      White.Pixel,
+      (TimeoutInitial - TimeoutRemain) * 100 / TimeoutInitial,
+      0
+      );
+  }
 }
 
 /**
