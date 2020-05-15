@@ -903,6 +903,7 @@
 !else
   UefiPayloadPkg/GraphicsOutputDxe/GraphicsOutputDxe.inf
 !endif
+  UefiPayloadPkg/PciPlatformDxe/PciPlatformDxe.inf
 
 !if $(PERFORMANCE_MEASUREMENT_ENABLE)
   MdeModulePkg/Universal/Acpi/FirmwarePerformanceDataTableDxe/FirmwarePerformanceDxe.inf

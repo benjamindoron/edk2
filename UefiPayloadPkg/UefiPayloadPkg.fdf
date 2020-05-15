@@ -272,6 +272,7 @@ FILE FREEFORM = 878AC2CC-5343-46F2-B563-51F89DAF56BA {
 !else
 INF UefiPayloadPkg/GraphicsOutputDxe/GraphicsOutputDxe.inf
 !endif
+INF UefiPayloadPkg/PciPlatformDxe/PciPlatformDxe.inf
 
 #
 # SCSI/ATA/IDE/DISK Support
