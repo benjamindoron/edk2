@@ -359,6 +359,9 @@ INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
 !if $(SECURE_BOOT_ENABLE) == TRUE
   INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
+!if $(CPU_RNG_ENABLE) == TRUE
+INF SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
+!endif
 
 #
 # TPM support

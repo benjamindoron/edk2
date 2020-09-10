@@ -943,6 +943,9 @@
 !if $(SECURE_BOOT_ENABLE) == TRUE
   SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
+!if $(CPU_RNG_ENABLE) == TRUE
+  SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
+!endif
 
   #
   # TPM support
