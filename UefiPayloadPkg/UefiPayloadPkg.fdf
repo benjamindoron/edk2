@@ -268,6 +268,10 @@ INF MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
     INF SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
     INF SecurityPkg/Tcg/Tcg2Config/Tcg2ConfigDxe.inf
   !endif
+
+  !if $(CPU_RNG_ENABLE) == TRUE
+    INF SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
+  !endif
 !endif
 
 INF UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
@@ -522,6 +526,10 @@ INF SecurityPkg/Tcg/TcgDxe/TcgDxe.inf
 INF SecurityPkg/Tcg/TcgConfigDxe/TcgConfigDxe.inf
 INF SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
 INF SecurityPkg/Tcg/Tcg2Config/Tcg2ConfigDxe.inf
+!endif
+
+!if $(CPU_RNG_ENABLE) == TRUE
+INF SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
 !endif
 
 !endif

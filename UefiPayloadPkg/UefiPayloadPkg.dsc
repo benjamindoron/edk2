@@ -1296,6 +1296,9 @@
   }
 !endif
 !endif
+!if $(CPU_RNG_ENABLE) == TRUE
+  SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
+!endif
 
 [Components.X64]
   UefiCpuPkg/CpuDxe/CpuDxe.inf
