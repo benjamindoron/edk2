@@ -13,6 +13,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/HobLib.h>
 #include <Library/PlatformSupportLib.h>
 #include <Guid/SmmStoreInfoGuid.h>
+#include <Guid/TcgPhysicalPresenceGuid.h>
 #include <Coreboot.h>
 
 /**
@@ -75,6 +76,55 @@ ParseSmmStoreInfo (
 }
 
 /**
+  Find the Tcg Physical Presence store information
+
+  @param  PPIInfo       Pointer to the TCG_PHYSICAL_PRESENCE_INFO structure
+
+  @retval RETURN_SUCCESS     Successfully find the SMM store buffer information.
+  @retval RETURN_NOT_FOUND   Failed to find the SMM store buffer information .
+
+**/
+RETURN_STATUS
+EFIAPI
+ParseTPMPPIInfo (
+  OUT TCG_PHYSICAL_PRESENCE_INFO       *PPIInfo
+  )
+{
+  struct cb_tpm_physical_presence       *CbTPPRec;
+  UINT8 VersionMajor;
+  UINT8 VersionMinor;
+
+  if (PPIInfo == NULL) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  CbTPPRec = FindCbTag (CB_TAG_TPM_PPI_HANDOFF);
+  if (CbTPPRec == NULL) {
+    return RETURN_NOT_FOUND;
+  }
+
+  VersionMajor = CbTPPRec->ppi_version >> 4;
+  VersionMinor = CbTPPRec->ppi_version & 0xF;
+
+  DEBUG ((DEBUG_INFO, "Found Tcg Physical Presence information\n"));
+  DEBUG ((DEBUG_INFO, "PpiAddress: 0x%x\n", CbTPPRec->ppi_address));
+  DEBUG ((DEBUG_INFO, "TpmVersion: 0x%x\n", CbTPPRec->tpm_version));
+  DEBUG ((DEBUG_INFO, "PpiVersion: %x.%x\n", VersionMajor, VersionMinor));
+
+  PPIInfo->PpiAddress = CbTPPRec->ppi_address;
+  if (CbTPPRec->tpm_version == LB_TPM_VERSION_TPM_VERSION_1_2) {
+    PPIInfo->TpmVersion = UEFIPAYLOAD_TPM_VERSION_1_2;
+  } else if (CbTPPRec->tpm_version == LB_TPM_VERSION_TPM_VERSION_2) {
+    PPIInfo->TpmVersion = UEFIPAYLOAD_TPM_VERSION_2;
+  }
+  if (VersionMajor == 1 && VersionMinor >= 3) {
+    PPIInfo->PpiVersion = UEFIPAYLOAD_TPM_PPI_VERSION_1_30;
+  }
+
+  return RETURN_SUCCESS;
+}
+
+/**
   Parse platform specific information from coreboot.
 
   @retval RETURN_SUCCESS       The platform specific coreboot support succeeded.
@@ -87,9 +137,11 @@ ParsePlatformInfo (
   VOID
   )
 {
-  SMMSTORE_INFO  SmmStoreInfo;
-  EFI_STATUS     Status;
-  SMMSTORE_INFO  *NewSmmStoreInfo;
+  SMMSTORE_INFO               SmmStoreInfo;
+  EFI_STATUS                  Status;
+  SMMSTORE_INFO               *NewSmmStoreInfo;
+  TCG_PHYSICAL_PRESENCE_INFO  PhysicalPresenceInfo;
+  TCG_PHYSICAL_PRESENCE_INFO  *NewPhysicalPresenceInfo;
 
   //
   // Create guid hob for SmmStore
@@ -100,6 +152,17 @@ ParsePlatformInfo (
     ASSERT (NewSmmStoreInfo != NULL);
     CopyMem (NewSmmStoreInfo, &SmmStoreInfo, sizeof (SmmStoreInfo));
     DEBUG ((DEBUG_INFO, "Created SmmStore info hob\n"));
+  }
+
+  //
+  // Create guid hob for Tcg Physical Presence Interface
+  //
+  Status = ParseTPMPPIInfo (&PhysicalPresenceInfo);
+  if (!EFI_ERROR (Status)) {
+    NewPhysicalPresenceInfo = BuildGuidHob (&gEfiTcgPhysicalPresenceInfoHobGuid, sizeof (PhysicalPresenceInfo));
+    ASSERT (NewPhysicalPresenceInfo != NULL);
+    CopyMem (NewPhysicalPresenceInfo, &PhysicalPresenceInfo, sizeof (PhysicalPresenceInfo));
+    DEBUG ((DEBUG_INFO, "Created Tcg Physical Presence info hob\n"));
   }
 
   return EFI_SUCCESS;

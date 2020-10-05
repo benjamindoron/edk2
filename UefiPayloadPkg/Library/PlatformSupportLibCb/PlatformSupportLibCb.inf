@@ -36,3 +36,4 @@
 
 [Guids]
   gEfiSmmStoreInfoHobGuid
+  gEfiTcgPhysicalPresenceInfoHobGuid
