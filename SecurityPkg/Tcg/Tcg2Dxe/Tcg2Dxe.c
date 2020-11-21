@@ -2564,6 +2564,17 @@ OnExitBootServicesFailed (
   EFI_STATUS  Status;
 
   //
+  // Measure invocation of ExitBootServices,
+  //
+  Status = TcgMeasureAction (
+             5,
+             EFI_EXIT_BOOT_SERVICES_INVOCATION
+             );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((EFI_D_ERROR, "%a not Measured. Error!\n", EFI_EXIT_BOOT_SERVICES_INVOCATION));
+  }
+
+  //
   // Measure Failure of ExitBootServices,
   //
   Status = TcgMeasureAction (
@@ -2809,7 +2820,7 @@ DriverEntry (
 
     Status = gBS->CreateEventEx (
                     EVT_NOTIFY_SIGNAL,
-                    TPL_NOTIFY,
+                    TPL_CALLBACK,
                     OnExitBootServices,
                     NULL,
                     &gEfiEventExitBootServicesGuid,
@@ -2821,7 +2832,7 @@ DriverEntry (
     //
     Status = gBS->CreateEventEx (
                     EVT_NOTIFY_SIGNAL,
-                    TPL_NOTIFY,
+                    TPL_CALLBACK,
                     OnExitBootServicesFailed,
                     NULL,
                     &gEventExitBootServicesFailedGuid,
