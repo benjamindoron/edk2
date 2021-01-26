@@ -7,6 +7,7 @@
 
 **/
 #include "BlSupportDxe.h"
+#include <Guid/TpmInstance.h>
 
 /**
   Main entry for the bootloader support DXE module.
@@ -29,6 +30,7 @@ BlDxeEntryPoint (
   EFI_HOB_GUID_TYPE          *GuidHob;
   EFI_PEI_GRAPHICS_INFO_HOB  *GfxInfo;
   ACPI_BOARD_INFO            *AcpiBoardInfo;
+  UINTN                      Size;
   FIRMWARE_INFO              *FirmwareInfo;
   EFI_SYSTEM_RESOURCE_TABLE  *Esrt;
   EFI_SYSTEM_RESOURCE_ENTRY  *Esre;
@@ -71,6 +73,24 @@ BlDxeEntryPoint (
                       EFI_NATIVE_INTERFACE,
                       NULL
                       );
+      ASSERT_EFI_ERROR (Status);
+    }
+
+    if (AcpiBoardInfo->TPM20Present) {
+      Size = sizeof (gEfiTpmDeviceInstanceTpm20DtpmGuid);
+      Status = PcdSetPtrS (
+               PcdTpmInstanceGuid,
+               &Size,
+               &gEfiTpmDeviceInstanceTpm20DtpmGuid
+               );
+      ASSERT_EFI_ERROR (Status);
+    } else if (AcpiBoardInfo->TPM12Present) {
+      Size = sizeof (gEfiTpmDeviceInstanceTpm12Guid);
+      Status = PcdSetPtrS (
+                 PcdTpmInstanceGuid,
+                 &Size,
+                 &gEfiTpmDeviceInstanceTpm12Guid
+                 );
       ASSERT_EFI_ERROR (Status);
     }
   }
