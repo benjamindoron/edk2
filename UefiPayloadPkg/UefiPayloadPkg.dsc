@@ -882,6 +882,9 @@
   ## Patched by BlSupportDxe
   gEfiSecurityPkgTokenSpaceGuid.PcdTpmInstanceGuid|{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
+  ## Match the hash algorithms listed in Tcg2Dxe
+  gEfiSecurityPkgTokenSpaceGuid.PcdTcg2HashAlgorithmBitmap|0x1F
+
 [PcdsDynamicExDefault.AARCH64]
   # ARM on QEMU platform
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase64   | 0
