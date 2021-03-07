@@ -158,6 +158,8 @@
   DEFINE SD_ENABLE                    = TRUE
   DEFINE SD_MMC_TIMEOUT               = 1000000
 
+  DEFINE CSM_ENABLE                   = FALSE
+
   #
   # UEFI network modules
   #
@@ -1038,7 +1040,13 @@
   SecurityPkg/Tcg/TcgConfigDxe/TcgConfigDxe.inf
 !endif
 
-  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+  MdeModulePkg/Universal/BdsDxe/BdsDxe.inf {
+    <LibraryClasses>
+!if $(CSM_ENABLE) == TRUE
+      NULL|UefiPayloadPkg/Csm/CsmSupportLib/CsmSupportLib.inf
+      NULL|OvmfPkg/Csm/LegacyBootManagerLib/LegacyBootManagerLib.inf
+!endif
+  }
 !if $(BOOTSPLASH_IMAGE)
   MdeModulePkg/Logo/LogoDxe.inf
 !endif
@@ -1047,6 +1055,10 @@
       NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
+!if $(CSM_ENABLE) == TRUE
+      NULL|OvmfPkg/Csm/LegacyBootManagerLib/LegacyBootManagerLib.inf
+      NULL|OvmfPkg/Csm/LegacyBootMaintUiLib/LegacyBootMaintUiLib.inf
+!endif
   }
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
 !if $(CAPSULE_SUPPORT) == TRUE
@@ -1181,6 +1193,15 @@
   MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
   MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
+
+!if $(CSM_ENABLE) == TRUE
+  OvmfPkg/8259InterruptControllerDxe/8259.inf
+  # Use HPET, PIT set to CSM compatible
+  #OvmfPkg/8254TimerDxe/8254Timer.inf
+  OvmfPkg/Csm/BiosThunk/VideoDxe/VideoDxe.inf
+  OvmfPkg/Csm/LegacyBiosDxe/LegacyBiosDxe.inf
+  OvmfPkg/Csm/Csm16/Csm16.inf
+!endif
 
   #
   # ISA Support
