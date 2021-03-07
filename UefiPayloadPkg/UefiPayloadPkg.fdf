@@ -440,6 +440,7 @@ INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
 #
 !if $(SHELL_TYPE) == BUILD_SHELL
 INF ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf
+INF ShellPkg/DynamicCommand/HttpDynamicCommand/HttpDynamicCommand.inf
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
 INF ShellPkg/DynamicCommand/DpDynamicCommand/DpDynamicCommand.inf
 !endif
