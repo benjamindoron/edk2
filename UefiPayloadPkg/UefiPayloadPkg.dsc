@@ -100,6 +100,7 @@
   #
   DEFINE SECURITY_STUB_ENABLE         = TRUE
   DEFINE SECURE_BOOT_ENABLE           = FALSE
+  DEFINE TPM_ENABLE                   = FALSE
 
   #
   # Miscellaneous drivers
@@ -411,7 +412,16 @@
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
 !endif
 
+!if $(TPM_ENABLE) == TRUE
+  Tpm12CommandLib|SecurityPkg/Library/Tpm12CommandLib/Tpm12CommandLib.inf
+  Tpm2CommandLib|SecurityPkg/Library/Tpm2CommandLib/Tpm2CommandLib.inf
+  Tcg2PhysicalPresenceLib|SecurityPkg/Library/DxeTcg2PhysicalPresenceLib/DxeTcg2PhysicalPresenceLib.inf
+  TcgPpVendorLib|SecurityPkg/Library/TcgPpVendorLibNull/TcgPpVendorLibNull.inf
+  Tcg2PpVendorLib|SecurityPkg/Library/Tcg2PpVendorLibNull/Tcg2PpVendorLibNull.inf
+  TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
+!else
   TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
+!endif
 
 !if $(VARIABLE_SUPPORT) == "SMMSTORE" || ($(CAPSULE_SUPPORT) && $(BOOTLOADER) == "COREBOOT")
   SmmStoreLib|UefiPayloadPkg/Library/SmmStoreLib/SmmStoreLib.inf
@@ -516,6 +526,10 @@
 !endif
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+!endif
+!if $(TPM_ENABLE) == TRUE
+  Tpm12DeviceLib|SecurityPkg/Library/Tpm12DeviceLibTcg/Tpm12DeviceLibTcg.inf
+  Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibTcg2/Tpm2DeviceLibTcg2.inf
 !endif
 
 [LibraryClasses.X64.DXE_DRIVER]
@@ -712,6 +726,10 @@
   gEfiSecurityPkgTokenSpaceGuid.PcdRemovableMediaImageVerificationPolicy|0x04
 !endif
 
+!if $(TPM_ENABLE) == TRUE
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2AcpiTableRev|4
+!endif
+
   # Enable NX memory protection for all non-code regions, including OEM and OS
   # reserved ones, with the exception of LoaderData regions, of which OS loaders
   # (i.e., GRUB) may assume that its contents are executable.
@@ -853,6 +871,17 @@
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultParity|$(UART_DEFAULT_PARITY)
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits|$(UART_DEFAULT_STOP_BITS)
 
+!if $(TPM_ENABLE) == TRUE
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2InitializationPolicy|0
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmInitializationPolicy|0
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2SelfTestPolicy|0
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpm2ScrtmPolicy|0
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmScrtmPolicy|0
+!endif
+
+  ## Patched by BlSupportDxe
+  gEfiSecurityPkgTokenSpaceGuid.PcdTpmInstanceGuid|{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+
 [PcdsDynamicExDefault.AARCH64]
   # ARM on QEMU platform
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase64   | 0
@@ -952,11 +981,35 @@
 !if $(SECURE_BOOT_ENABLE) == TRUE
       NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
 !endif
+!if $(TPM_ENABLE) == TRUE
+      NULL|SecurityPkg/Library/DxeTpmMeasureBootLib/DxeTpmMeasureBootLib.inf
+      NULL|SecurityPkg/Library/DxeTpm2MeasureBootLib/DxeTpm2MeasureBootLib.inf
+!endif
   }
 !endif
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+!endif
+
+!if $(TPM_ENABLE) == TRUE
+  SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf {
+    <LibraryClasses>
+      Tpm2DeviceLib|SecurityPkg/Library/Tpm2DeviceLibRouter/Tpm2DeviceLibRouterDxe.inf
+      NULL|SecurityPkg/Library/Tpm2DeviceLibDTpm/Tpm2InstanceLibDTpm.inf
+      HashLib|SecurityPkg/Library/HashLibBaseCryptoRouter/HashLibBaseCryptoRouterDxe.inf
+      NULL|SecurityPkg/Library/HashInstanceLibSha1/HashInstanceLibSha1.inf
+      NULL|SecurityPkg/Library/HashInstanceLibSha256/HashInstanceLibSha256.inf
+      NULL|SecurityPkg/Library/HashInstanceLibSha384/HashInstanceLibSha384.inf
+      NULL|SecurityPkg/Library/HashInstanceLibSha512/HashInstanceLibSha512.inf
+      NULL|SecurityPkg/Library/HashInstanceLibSm3/HashInstanceLibSm3.inf
+  }
+  SecurityPkg/Tcg/Tcg2Config/Tcg2ConfigDxe.inf
+  SecurityPkg/Tcg/TcgDxe/TcgDxe.inf {
+    <LibraryClasses>
+      Tpm12DeviceLib|SecurityPkg/Library/Tpm12DeviceLibDTpm/Tpm12DeviceLibDTpm.inf
+  }
+  SecurityPkg/Tcg/TcgConfigDxe/TcgConfigDxe.inf
 !endif
 
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf

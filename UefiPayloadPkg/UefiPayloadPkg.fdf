@@ -261,6 +261,13 @@ INF MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   !if $(SECURE_BOOT_ENABLE) == TRUE
     INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
   !endif
+
+  !if $(TPM_ENABLE) == TRUE
+    INF SecurityPkg/Tcg/TcgDxe/TcgDxe.inf
+    INF SecurityPkg/Tcg/TcgConfigDxe/TcgConfigDxe.inf
+    INF SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
+    INF SecurityPkg/Tcg/Tcg2Config/Tcg2ConfigDxe.inf
+  !endif
 !endif
 
 INF UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
@@ -484,7 +491,6 @@ INF UefiCpuPkg/CpuIo2Smm/CpuIo2StandaloneMm.inf
 !endif
 
 !if $(UNIVERSAL_PAYLOAD) == TRUE
-!if $(SECURE_BOOT_ENABLE) == TRUE
 
 [FV.SECFV]
 FvNameGuid         = 2700E2F3-19D2-4E2D-9F13-BC891B9FC62C
@@ -507,9 +513,17 @@ READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
+!if $(SECURE_BOOT_ENABLE) == TRUE
 INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
-
 !endif
+
+!if $(TPM_ENABLE) == TRUE
+INF SecurityPkg/Tcg/TcgDxe/TcgDxe.inf
+INF SecurityPkg/Tcg/TcgConfigDxe/TcgConfigDxe.inf
+INF SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
+INF SecurityPkg/Tcg/Tcg2Config/Tcg2ConfigDxe.inf
+!endif
+
 !endif
 
 
