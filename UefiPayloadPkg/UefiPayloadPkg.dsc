@@ -1034,6 +1034,12 @@
       #  This should be FALSE for compiling the dynamic command.
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
   }
+  ShellPkg/DynamicCommand/HttpDynamicCommand/HttpDynamicCommand.inf {
+    <PcdsFixedAtBuild>
+      ## This flag is used to control initialization of the shell library
+      #  This should be FALSE for compiling the dynamic command.
+      gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
+  }
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
   ShellPkg/DynamicCommand/DpDynamicCommand/DpDynamicCommand.inf {
     <PcdsFixedAtBuild>
