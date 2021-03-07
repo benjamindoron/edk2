@@ -999,18 +999,20 @@ LegacyBiosInstall (
     1,
     &MemoryAddress
     );
-  ASSERT (MemoryAddress == 0x000000000);
+  if (MemoryAddress != 0x000000000) {
+    DEBUG ((DEBUG_WARN, "Failed to allocate page 0! Is it reserved by boot firmware already?\n"));
+  }
 
-  ClearPtr = (VOID *)((UINTN)0x0000);
+  ClearPtr = (VOID *) ((UINTN) 0x0000);
 
   //
   // Initialize region from 0x0000 to 4k. This initializes interrupt vector
   // range.
   //
   ACCESS_PAGE0_CODE (
-    gBS->SetMem ((VOID *)ClearPtr, 0x400, INITIAL_VALUE_BELOW_1K);
-    ZeroMem ((VOID *)((UINTN)ClearPtr + 0x400), 0xC00);
-    );
+    gBS->SetMem ((VOID *) ClearPtr, 0x400, INITIAL_VALUE_BELOW_1K);
+    ZeroMem ((VOID *) ((UINTN)ClearPtr + 0x400), 0xC00);
+  );
 
   //
   // Allocate pages for OPROM usage
