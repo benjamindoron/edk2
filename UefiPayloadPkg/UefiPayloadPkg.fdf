@@ -360,6 +360,15 @@ INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
   INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
 
+#
+# TPM support
+#
+!if $(TPM_ENABLE) == TRUE
+INF SecurityPkg/Tcg/TcgDxe/TcgDxe.inf
+INF SecurityPkg/Tcg/TcgConfigDxe/TcgConfigDxe.inf
+INF SecurityPkg/Tcg/Tcg2Dxe/Tcg2Dxe.inf
+INF SecurityPkg/Tcg/Tcg2Config/Tcg2ConfigDxe.inf
+!endif
 
 #
 # Shell
