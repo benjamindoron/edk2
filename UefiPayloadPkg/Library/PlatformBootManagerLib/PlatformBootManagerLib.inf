@@ -58,6 +58,7 @@
   gEfiUgaDrawProtocolGuid         ## CONSUMES
   gEfiBootLogoProtocolGuid        ## CONSUMES
   gEfiDxeSmmReadyToLockProtocolGuid
+  gEfiFirmwareVolume2ProtocolGuid ## CONSUMES
   gEfiSmmAccess2ProtocolGuid
   gEfiSerialIoProtocolGuid
   gEfiPciRootBridgeIoProtocolGuid
