@@ -372,7 +372,7 @@ DumpPpiList (
 
   for (Index = 0; Index < PrivateData->PpiData.CallbackNotifyList.CurrentCount; Index++) {
     DEBUG ((
-      DEBUG_VERBOSE,
+      DEBUG_INFO,
       "CallbackNotify[%2d] {%g} at 0x%x (%a)\n",
       Index,
       PrivateData->PpiData.CallbackNotifyList.NotifyPtrs[Index].Notify->Guid,
@@ -387,7 +387,7 @@ DumpPpiList (
       ));
   }
   for (Index = 0; Index < PrivateData->PpiData.DispatchNotifyList.CurrentCount; Index++) {
-    DEBUG ((DEBUG_VERBOSE,
+    DEBUG ((DEBUG_INFO,
     "DispatchNotify[%2d] {%g} at 0x%x (%a)\n",
     Index,
     PrivateData->PpiData.DispatchNotifyList.NotifyPtrs[Index].Notify->Guid,
@@ -402,7 +402,7 @@ DumpPpiList (
     ));
   }
   for (Index = 0; Index < PrivateData->PpiData.PpiList.CurrentCount; Index++) {
-    DEBUG ((DEBUG_VERBOSE,
+    DEBUG ((DEBUG_INFO,
     "PPI[%2d] {%g} at 0x%x (%a)\n",
     Index,
     PrivateData->PpiData.PpiList.PpiPtrs[Index].Ppi->Guid,

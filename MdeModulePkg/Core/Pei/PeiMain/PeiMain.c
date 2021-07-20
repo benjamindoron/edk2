@@ -438,6 +438,10 @@ PeiCore (
 
       DEBUG ((DEBUG_VERBOSE, "PPI lists after temporary RAM evacuation:\n"));
       DumpPpiList (&PrivateData);
+    // Show the addresses of PPIs in all cases
+    } else {
+      DEBUG ((DEBUG_INFO, "Dumping PPI lists:\n"));
+      DumpPpiList (&PrivateData);
     }
 
     //
