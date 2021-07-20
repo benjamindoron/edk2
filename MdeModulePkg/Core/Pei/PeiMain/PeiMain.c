@@ -367,14 +367,18 @@ PeiCore (
   SetPeiServicesTablePointer ((CONST EFI_PEI_SERVICES **)&PrivateData.Ps);
 
   //
+  // Initialize PEI Core Services
+  // TODO: Re-ordering because AllocateZeroPool consumed by PeiSerialPortLibSpiFlash's
+  // dependencies use memory services. As ProcessLibraryConstructorList() only
+  // executes DebugLib's constructor, InitializeMemoryServices() can't depend on it,
+  // so this should be safe.
+  //
+  InitializeMemoryServices   (&PrivateData, SecCoreData, OldCoreData);
+
+  //
   // Initialize libraries that the PEI Core is linked against
   //
   ProcessLibraryConstructorList (NULL, (CONST EFI_PEI_SERVICES **)&PrivateData.Ps);
-
-  //
-  // Initialize PEI Core Services
-  //
-  InitializeMemoryServices   (&PrivateData, SecCoreData, OldCoreData);
 
   //
   // Update performance measurements
