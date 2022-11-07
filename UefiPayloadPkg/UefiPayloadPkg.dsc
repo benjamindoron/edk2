@@ -68,6 +68,7 @@
   # CPU options
   #
   DEFINE MAX_LOGICAL_PROCESSORS       = 1024
+  DEFINE CPU_RNG_ENABLE               = TRUE
 
   #
   # PCI options
@@ -213,7 +214,11 @@
 !endif
   IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
   OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+!if $(CPU_RNG_ENABLE) == TRUE
   RngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
+!else
+  RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+!endif
   HobLib|UefiPayloadPkg/Library/DxeHobLib/DxeHobLib.inf
 
   #
