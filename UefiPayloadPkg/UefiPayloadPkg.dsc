@@ -130,6 +130,7 @@
   # CPU options
   #
   DEFINE MAX_LOGICAL_PROCESSORS       = 1024
+  DEFINE CPU_RNG_ENABLE               = TRUE
 
   # For recent X86 CPU, 0x15 CPUID instruction will return Time Stamp Counter Frequence.
   # This is how BaseCpuTimerLib works, and a recommended way to get Frequence, so set the default value as TRUE.
@@ -394,7 +395,11 @@
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
   TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
 !endif
+!if $(CPU_RNG_ENABLE) == TRUE
   RngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
+!else
+  RngLib|MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+!endif
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   PlatformSecureLib|SecurityPkg/Library/PlatformSecureLibNull/PlatformSecureLibNull.inf
