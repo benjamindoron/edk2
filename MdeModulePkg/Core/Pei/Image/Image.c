@@ -764,9 +764,9 @@ PeiLoadImageLoadImage (
     DEBUG ((DEBUG_INFO | DEBUG_LOAD, "%a", EfiFileName));
   }
 
-  DEBUG_CODE_END ();
-
   DEBUG ((DEBUG_INFO | DEBUG_LOAD, "\n"));
+
+  DEBUG_CODE_END ();
 
   return EFI_SUCCESS;
 }

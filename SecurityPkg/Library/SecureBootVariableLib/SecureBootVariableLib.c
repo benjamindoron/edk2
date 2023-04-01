@@ -357,7 +357,7 @@ DeleteVariable (
 
   Status = CreateTimeBasedPayload (&DataSize, &Data, &mMaxTimestamp);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Fail to create time-based data payload: %r", Status));
+    DEBUG ((DEBUG_ERROR, "Fail to create time-based data payload: %r\n", Status));
     return Status;
   }
 
