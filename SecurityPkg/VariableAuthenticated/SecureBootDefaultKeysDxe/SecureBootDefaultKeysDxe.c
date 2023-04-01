@@ -40,6 +40,7 @@ SecureBootDefaultKeysEntryPoint (
 {
   EFI_STATUS  Status;
 
+  // TODO: Also enroll all keys from Defaults?
   Status = SecureBootInitPKDefault ();
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: Cannot initialize PKDefault: %r\n", __func__, Status));
