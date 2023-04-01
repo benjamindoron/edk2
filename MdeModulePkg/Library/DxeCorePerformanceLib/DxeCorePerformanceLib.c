@@ -108,6 +108,7 @@ GetFpdtRecordPtr (
     if (mBootRecordSize + RecordSize > mBootRecordMaxSize) {
       if (!mLackSpaceIsReported) {
         DEBUG ((DEBUG_INFO, "DxeCorePerformanceLib: No enough space to save boot records\n"));
+        DEBUG ((DEBUG_INFO, "ATTN: Requested size is 0x%x, max is 0x%x\n", mBootRecordSize + RecordSize, mBootRecordMaxSize));
         mLackSpaceIsReported = TRUE;
       }
 
