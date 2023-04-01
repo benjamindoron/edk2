@@ -15,6 +15,11 @@
 #include <Library/HobLib.h>
 #include <Library/BlParseLib.h>
 #include <IndustryStandard/Acpi.h>
+#include <Guid/SmmRegisterInfoGuid.h>
+#include <Guid/SmramMemoryReserve.h>
+#include <Guid/SpiFlashInfoGuid.h>
+#include <Guid/NvVariableInfoGuid.h>
+#include <Guid/SmmS3CommunicationInfoGuid.h>
 #include <UniversalPayload/PciRootBridges.h>
 
 /**
@@ -264,6 +269,17 @@ ParseMiscInfo (
   RETURN_STATUS                       Status;
   UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES  *BlRootBridgesHob;
   UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES  *PldRootBridgesHob;
+  // TODO: Drop half by ignoring return?
+  PLD_SMM_REGISTERS                   *BlSmmRegisters;
+  PLD_SMM_REGISTERS                   *PldSmmRegisters;
+  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK      *BlSmramHob;
+  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK      *PldSmramHob;
+  SPI_FLASH_INFO                      *BlSpiFlashInfo;
+  SPI_FLASH_INFO                      *PldSpiFlashInfo;
+  NV_VARIABLE_INFO                    *BlNvVariableInfo;
+  NV_VARIABLE_INFO                    *PldNvVariableInfo;
+  PLD_S3_COMMUNICATION                *BlS3Communication;
+  PLD_S3_COMMUNICATION                *PldS3Communication;
 
   Status           = RETURN_NOT_FOUND;
   BlRootBridgesHob = (UNIVERSAL_PAYLOAD_PCI_ROOT_BRIDGES *)GetGuidHobDataFromSbl (
@@ -284,6 +300,67 @@ ParseMiscInfo (
       Status = RETURN_SUCCESS;
     } else {
       Status = RETURN_OUT_OF_RESOURCES;
+    }
+  }
+
+  // Perhaps payload does not perform SMM, do not override Status
+  BlSmmRegisters = GetGuidHobDataFromSbl (&gSmmRegisterInfoGuid);
+  if (BlSmmRegisters != NULL) {
+    PldSmmRegisters = BuildGuidDataHob (
+                        &gSmmRegisterInfoGuid,
+                        BlSmmRegisters,
+                        sizeof (PLD_SMM_REGISTERS) + (BlSmmRegisters->Count * sizeof (PLD_GENERIC_REGISTER))
+                        );
+    if (PldSmmRegisters != NULL) {
+      DEBUG ((DEBUG_INFO, "Create SMM register info guid hob\n"));
+    }
+  }
+
+  BlSmramHob = GetGuidHobDataFromSbl (&gEfiSmmSmramMemoryGuid);
+  if (BlSmramHob != NULL) {
+    PldSmramHob = BuildGuidDataHob (
+                    &gEfiSmmSmramMemoryGuid,
+                    BlSmramHob,
+                    sizeof (UINT32) + (BlSmramHob->number_of_smm_regions * sizeof (EFI_SMRAM_DESCRIPTOR))
+                    );
+    if (PldSmramHob != NULL) {
+      DEBUG ((DEBUG_INFO, "Create SMM SMRAM memory info guid hob\n"));
+    }
+  }
+
+  BlSpiFlashInfo = GetGuidHobDataFromSbl (&gSpiFlashInfoGuid);
+  if (BlSpiFlashInfo != NULL) {
+    PldSpiFlashInfo = BuildGuidDataHob (
+                        &gSpiFlashInfoGuid,
+                        BlSpiFlashInfo,
+                        sizeof (SPI_FLASH_INFO)
+                        );
+    if (PldSpiFlashInfo != NULL) {
+      DEBUG ((DEBUG_INFO, "Create SPI flash info guid hob\n"));
+    }
+  }
+
+  BlNvVariableInfo = GetGuidHobDataFromSbl (&gNvVariableInfoGuid);
+  if (BlNvVariableInfo != NULL) {
+    PldNvVariableInfo = BuildGuidDataHob (
+                          &gNvVariableInfoGuid,
+                          BlNvVariableInfo,
+                          sizeof (NV_VARIABLE_INFO)
+                          );
+    if (PldNvVariableInfo != NULL) {
+      DEBUG ((DEBUG_INFO, "Create NV variable info guid hob\n"));
+    }
+  }
+
+  BlS3Communication = GetGuidHobDataFromSbl (&gS3CommunicationGuid);
+  if (BlS3Communication != NULL) {
+    PldS3Communication = BuildGuidDataHob (
+                           &gS3CommunicationGuid,
+                           BlS3Communication,
+                           sizeof (PLD_S3_COMMUNICATION)
+                           );
+    if (PldS3Communication != NULL) {
+      DEBUG ((DEBUG_INFO, "Create S3 communication guid hob\n"));
     }
   }
 
