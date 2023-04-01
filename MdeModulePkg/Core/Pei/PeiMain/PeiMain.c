@@ -385,14 +385,14 @@ PeiCore (
   SetPeiServicesTablePointer ((CONST EFI_PEI_SERVICES **)&PrivateData.Ps);
 
   //
+  // Initialize PEI Core Services
+  //
+  InitializeMemoryServices   (&PrivateData, SecCoreData, OldCoreData);
+
+  //
   // Initialize libraries that the PEI Core is linked against
   //
   ProcessLibraryConstructorList (NULL, (CONST EFI_PEI_SERVICES **)&PrivateData.Ps);
-
-  //
-  // Initialize PEI Core Services
-  //
-  InitializeMemoryServices (&PrivateData, SecCoreData, OldCoreData);
 
   //
   // Update performance measurements

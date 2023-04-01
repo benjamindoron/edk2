@@ -295,17 +295,9 @@ DxeMain (
   ASSERT_EFI_ERROR (Status);
 
   //
-  // Initialize the Global Coherency Domain Services
-  //
-  Status = CoreInitializeGcdServices (&HobStart, MemoryBaseAddress, MemoryLength);
-  ASSERT_EFI_ERROR (Status);
-
-  //
   // Call constructor for all libraries
   //
   ProcessLibraryConstructorList (gDxeCoreImageHandle, gDxeCoreST);
-  PERF_CROSSMODULE_END ("PEI");
-  PERF_CROSSMODULE_BEGIN ("DXE");
 
   //
   // Log MemoryBaseAddress and MemoryLength again (from
@@ -319,6 +311,14 @@ DxeMain (
     MemoryBaseAddress,
     MemoryLength
     ));
+
+  //
+  // Initialize the Global Coherency Domain Services
+  //
+  Status = CoreInitializeGcdServices (&HobStart, MemoryBaseAddress, MemoryLength);
+  ASSERT_EFI_ERROR (Status);
+  PERF_CROSSMODULE_END ("PEI");
+  PERF_CROSSMODULE_BEGIN ("DXE");
 
   //
   // Report DXE Core image information to the PE/COFF Extra Action Library
