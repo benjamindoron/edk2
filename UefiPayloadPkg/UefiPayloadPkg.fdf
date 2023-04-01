@@ -273,7 +273,25 @@ INF MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
 !if $(RAM_DISK_ENABLE) == TRUE
 INF MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
 !endif
+
+#
+# Filesystem drivers
+#
 INF FatPkg/EnhancedFatDxe/Fat.inf
+INF MdeModulePkg/Universal/Disk/UdfDxe/UdfDxe.inf
+
+FILE DRIVER = cb683001-379f-48c7-b7b6-707d29454bf5 {
+ SECTION PE32 = FSDrivers/exfat.efi
+}
+FILE DRIVER = 9d380387-a15a-4053-ae19-ff3495b6d0d5 {
+ SECTION PE32 = FSDrivers/ext2.efi
+}
+FILE DRIVER = a3c66659-21e3-4ff7-8ba6-58291776bbde {
+ SECTION PE32 = FSDrivers/btrfs.efi
+}
+FILE DRIVER = 2282efd0-678b-4753-8d06-200d5940285d {
+ SECTION PE32 = FSDrivers/ntfs.efi
+}
 
 #
 # SD/eMMC Support
