@@ -27,9 +27,9 @@
   PCD_DYNAMIC_AS_DYNAMICEX            = TRUE
 
   DEFINE SOURCE_DEBUG_ENABLE          = FALSE
-  DEFINE PS2_KEYBOARD_ENABLE          = FALSE
+  DEFINE PS2_KEYBOARD_ENABLE          = TRUE
   DEFINE RAM_DISK_ENABLE              = FALSE
-  DEFINE SIO_BUS_ENABLE               = FALSE
+  DEFINE SIO_BUS_ENABLE               = TRUE
   DEFINE SECURITY_STUB_ENABLE         = TRUE
   DEFINE SMM_SUPPORT                  = FALSE
   DEFINE PLATFORM_BOOT_TIMEOUT        = 3
@@ -110,7 +110,7 @@
   DEFINE PCI_SERIAL_PARAMETERS        = {0xff,0xff, 0x00,0x00, 0x0,0x20,0x1c,0x00, 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0, 0x00,    0x01, 0x0,0x0, 0x0,0x0, 0x0,0x0, 0xff,0xff}
 
   #
-  # Shell options: [BUILD_SHELL, MIN_BIN, NONE, UEFI_BIN]
+  # Shell options: [BUILD_SHELL, NONE]
   #
   DEFINE SHELL_TYPE                   = BUILD_SHELL
 
@@ -149,7 +149,7 @@
   MSFT:RELEASE_*_*_CC_FLAGS      = /D MDEPKG_NDEBUG
 !endif
 
-[BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
+[BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER, BuildOptions.common.EDKII.DXE_SMM_DRIVER, BuildOptions.common.EDKII.SMM_CORE]
   GCC:*_*_*_DLINK_FLAGS      = -z common-page-size=0x1000
   XCODE:*_*_*_DLINK_FLAGS    = -seg1addr 0x1000 -segalign 0x1000
   XCODE:*_*_*_MTOC_FLAGS     = -align 0x1000
@@ -565,7 +565,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64|0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase|0
-  gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut|$(PLATFORM_BOOT_TIMEOUT)
 !if $(VARIABLE_SUPPORT) == "SPI"
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize  |0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize|0
@@ -598,6 +597,9 @@
 
   gPcAtChipsetPkgTokenSpaceGuid.PcdRtcIndexRegister|$(RTC_INDEX_REGISTER)
   gPcAtChipsetPkgTokenSpaceGuid.PcdRtcTargetRegister|$(RTC_TARGET_REGISTER)
+
+[PcdsDynamicHii]
+  gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut|L"Timeout"|gEfiGlobalVariableGuid|0x0|$(PLATFORM_BOOT_TIMEOUT)
 
 ################################################################################
 #
@@ -685,9 +687,7 @@
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
 !endif
   PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
-!if $(EMU_VARIABLE_ENABLE) == TRUE
-  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
-!endif
+
   #
   # Following are the DXE drivers
   #
@@ -861,7 +861,6 @@
   #
 [LibraryClasses]
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
-  DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
   ShellLib|ShellPkg/Library/UefiShellLib/UefiShellLib.inf
   !include NetworkPkg/NetworkLibs.dsc.inc
@@ -898,6 +897,7 @@
       NULL|ShellPkg/Library/UefiShellDriver1CommandsLib/UefiShellDriver1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellInstall1CommandsLib/UefiShellInstall1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
+      NULL|ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
 
     #------------------------------
     #  Networking commands
@@ -911,13 +911,11 @@
     #------------------------------
 
     <LibraryClasses>
-      DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
       HandleParsingLib|ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf
       OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
       ShellCEntryLib|ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.inf
       ShellCommandLib|ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf
-      SortLib|MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
   }
 
 !endif
