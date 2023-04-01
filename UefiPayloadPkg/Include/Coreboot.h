@@ -270,6 +270,56 @@ struct fmap {
   struct fmap_area areas[];
 } __attribute__ ((packed));
 
+#define CB_TAG_PLD_SMM_REGISTER_INFO  0x0050
+struct lb_pld_generic_register {
+  UINT8  register_id;
+  UINT8  address_space_id;
+  UINT8  register_bit_width;
+  UINT8  register_bit_offset;
+  UINT32 value;
+  struct cbuint64 address;
+};
+
+struct lb_pld_smm_registers {
+  UINT32 tag;
+  UINT32 size;
+  UINT32 revision;
+  UINT32 count;
+  struct lb_pld_generic_register registers[];
+};
+
+#define CB_TAG_PLD_SMM_SMRAM          0x0051
+struct lb_pld_smram_descriptor {
+  struct cbuint64 physical_start;
+  struct cbuint64 physical_size;
+  struct cbuint64 region_state;
+};
+
+struct lb_pld_smram_descriptor_block {
+  UINT32 tag;
+  UINT32 size;
+  UINT32 number_of_smm_regions;
+  struct lb_pld_smram_descriptor descriptor[1];
+};
+
+#define LB_TAG_PLD_SPI_FLASH_INFO     0x0052
+struct lb_pld_spi_flash_info {
+  UINT32 tag;
+  UINT32 size;
+  UINT16 revision;
+  UINT16 flags;
+  struct lb_pld_generic_register spi_address;
+};
+
+#define CB_TAG_PLD_S3_COMMUNICATION   0x0054
+struct lb_pld_s3_communication {
+  UINT32 tag;
+  UINT32 size;
+  struct lb_pld_smram_descriptor comm_buffer;
+  UINT8  pld_acpi_s3_enable;
+  UINT8  pad[3];
+};
+
 /* Helpful macros */
 
 #define MEM_RANGE_COUNT(_rec) \

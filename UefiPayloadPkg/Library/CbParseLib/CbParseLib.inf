@@ -34,6 +34,15 @@
   IoLib
   DebugLib
   PcdLib
+  HobLib
+  FmapParserLib
+
+[Guids]
+  gSmmRegisterInfoGuid
+  gEfiSmmSmramMemoryGuid
+  gSpiFlashInfoGuid
+  gNvVariableInfoGuid
+  gS3CommunicationGuid
 
 [Pcd]
   gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter

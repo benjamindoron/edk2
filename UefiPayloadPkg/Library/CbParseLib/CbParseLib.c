@@ -7,15 +7,22 @@
 
 **/
 
-#include <Uefi/UefiBaseType.h>
+#include <PiPei.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
 #include <Library/IoLib.h>
+#include <Library/HobLib.h>
 #include <Library/BlParseLib.h>
+#include <Library/FmapParserLib.h>
 #include <IndustryStandard/Acpi.h>
 #include <Coreboot.h>
+#include <Guid/SmmRegisterInfoGuid.h>
+#include <Guid/SmramMemoryReserve.h>
+#include <Guid/SpiFlashInfoGuid.h>
+#include <Guid/NvVariableInfoGuid.h>
+#include <Guid/SmmS3CommunicationInfoGuid.h>
 
 /**
   Convert a packed value from cbuint64 to a UINT64 value.
@@ -602,5 +609,117 @@ ParseMiscInfo (
   VOID
   )
 {
+  struct lb_pld_smm_registers           *BlSmmRegisters;
+  PLD_SMM_REGISTERS                     *PldSmmRegisters;
+  UINTN                                 Index;
+  struct lb_pld_smram_descriptor_block  *BlSmramInfo;
+  EFI_SMRAM_HOB_DESCRIPTOR_BLOCK        *PldSmramHob;
+  struct lb_pld_spi_flash_info          *BlSpiFlashInfo;
+  SPI_FLASH_INFO                        *PldSpiFlashInfo;
+  EFI_PHYSICAL_ADDRESS                  SmmStoreFmapRegionAddress;
+  UINT32                                SmmStoreFmapRegionSize;
+  EFI_STATUS                            Status;
+  NV_VARIABLE_INFO                      *PldNvVariableInfo;
+  struct lb_pld_s3_communication        *BlS3Communication;
+  PLD_S3_COMMUNICATION                  *PldS3Communication;
+
+  BlSmmRegisters = FindCbTag (CB_TAG_PLD_SMM_REGISTER_INFO);
+  if (BlSmmRegisters != NULL) {
+    PldSmmRegisters = BuildGuidHob (
+                        &gSmmRegisterInfoGuid,
+                        sizeof (PLD_SMM_REGISTERS) + (BlSmmRegisters->count * sizeof (PLD_GENERIC_REGISTER))
+                        );
+    if (PldSmmRegisters != NULL) {
+      PldSmmRegisters->Revision = BlSmmRegisters->revision;
+
+      PldSmmRegisters->Count = BlSmmRegisters->count;
+      for (Index = 0; Index < BlSmmRegisters->count; Index++) {
+        PldSmmRegisters->Registers[Index].Id = BlSmmRegisters->registers[Index].register_id;
+        PldSmmRegisters->Registers[Index].Address.AddressSpaceId = BlSmmRegisters->registers[Index].address_space_id;
+        PldSmmRegisters->Registers[Index].Address.RegisterBitWidth = BlSmmRegisters->registers[Index].register_bit_width;
+        PldSmmRegisters->Registers[Index].Address.RegisterBitOffset = BlSmmRegisters->registers[Index].register_bit_offset;
+        PldSmmRegisters->Registers[Index].Value = BlSmmRegisters->registers[Index].value;
+        PldSmmRegisters->Registers[Index].Address.Address = cb_unpack64 (BlSmmRegisters->registers[Index].address);
+
+        // Required for UefiPayload implementation compatibility
+        PldSmmRegisters->Registers[Index].Address.AccessSize = EFI_ACPI_3_0_DWORD;
+      }
+
+      DEBUG ((DEBUG_INFO, "Create SMM register info guid hob\n"));
+    }
+  }
+
+  BlSmramInfo = FindCbTag (CB_TAG_PLD_SMM_SMRAM);
+  if (BlSmramInfo != NULL) {
+    PldSmramHob = BuildGuidHob (
+                    &gEfiSmmSmramMemoryGuid,
+                    sizeof (UINT32) + (BlSmramInfo->number_of_smm_regions * sizeof (EFI_SMRAM_DESCRIPTOR))
+                    );
+    if (PldSmramHob != NULL) {
+      PldSmramHob->NumberOfSmmReservedRegions = BlSmramInfo->number_of_smm_regions;
+      for (Index = 0; Index < BlSmramInfo->number_of_smm_regions; Index++) {
+        PldSmramHob->Descriptor[Index].PhysicalStart = cb_unpack64 (BlSmramInfo->descriptor[Index].physical_start);
+        PldSmramHob->Descriptor[Index].CpuStart = cb_unpack64 (BlSmramInfo->descriptor[Index].physical_start);
+        PldSmramHob->Descriptor[Index].PhysicalSize = cb_unpack64 (BlSmramInfo->descriptor[Index].physical_size);
+        PldSmramHob->Descriptor[Index].RegionState = cb_unpack64 (BlSmramInfo->descriptor[Index].region_state);
+      }
+
+      DEBUG ((DEBUG_INFO, "Create SMM SMRAM memory info guid hob\n"));
+    }
+  }
+
+  BlSpiFlashInfo = FindCbTag (LB_TAG_PLD_SPI_FLASH_INFO);
+  if (BlSpiFlashInfo != NULL) {
+    PldSpiFlashInfo = BuildGuidHob (
+                        &gSpiFlashInfoGuid,
+                        sizeof (SPI_FLASH_INFO)
+                        );
+    if (PldSpiFlashInfo != NULL) {
+      PldSpiFlashInfo->Revision = BlSpiFlashInfo->revision;
+      PldSpiFlashInfo->Flags = BlSpiFlashInfo->flags;
+
+      PldSpiFlashInfo->SpiAddress.AddressSpaceId = BlSpiFlashInfo->spi_address.address_space_id;
+      PldSpiFlashInfo->SpiAddress.RegisterBitWidth = BlSpiFlashInfo->spi_address.register_bit_width;
+      PldSpiFlashInfo->SpiAddress.RegisterBitOffset = BlSpiFlashInfo->spi_address.register_bit_offset;
+      PldSpiFlashInfo->SpiAddress.Address = cb_unpack64 (BlSpiFlashInfo->spi_address.address);
+
+      // Required for UefiPayload implementation compatibility
+      PldSpiFlashInfo->SpiAddress.AccessSize = EFI_ACPI_3_0_DWORD;
+
+      DEBUG ((DEBUG_INFO, "Create SPI flash info guid hob\n"));
+    }
+  }
+
+  Status = FmapLocateArea ("SMMSTORE", &SmmStoreFmapRegionAddress, &SmmStoreFmapRegionSize);
+  if (!EFI_ERROR (Status)) {
+    PldNvVariableInfo = BuildGuidHob (
+                          &gNvVariableInfoGuid,
+                          sizeof (NV_VARIABLE_INFO)
+                          );
+    if (PldNvVariableInfo != NULL) {
+      PldNvVariableInfo->Revision = 0;
+      PldNvVariableInfo->VariableStoreBase = (UINT32)SmmStoreFmapRegionAddress;
+      PldNvVariableInfo->VariableStoreSize = SmmStoreFmapRegionSize;
+
+      DEBUG ((DEBUG_INFO, "Create NV variable info guid hob\n"));
+    }
+  }
+
+  BlS3Communication = FindCbTag (CB_TAG_PLD_S3_COMMUNICATION);
+  if (BlS3Communication != NULL) {
+    PldS3Communication = BuildGuidHob (
+                           &gS3CommunicationGuid,
+                           sizeof (PLD_S3_COMMUNICATION)
+                           );
+    if (PldS3Communication != NULL) {
+      PldS3Communication->CommBuffer.PhysicalStart = cb_unpack64 (BlS3Communication->comm_buffer.physical_start);
+      PldS3Communication->CommBuffer.CpuStart = cb_unpack64 (BlS3Communication->comm_buffer.physical_start);
+      PldS3Communication->CommBuffer.PhysicalSize = cb_unpack64 (BlS3Communication->comm_buffer.physical_size);
+      PldS3Communication->PldAcpiS3Enable = BlS3Communication->pld_acpi_s3_enable;
+
+      DEBUG ((DEBUG_INFO, "Create S3 communication guid hob\n"));
+    }
+  }
+
   return RETURN_SUCCESS;
 }
