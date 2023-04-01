@@ -18,6 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Guid/SmramMemoryReserve.h>
+#include <Guid/SmmRegisterInfoGuid.h>
 
 #define  SMM_ACCESS_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('S', 'M', 'M', 'A')
 

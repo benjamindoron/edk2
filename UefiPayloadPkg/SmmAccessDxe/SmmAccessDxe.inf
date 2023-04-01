@@ -40,9 +40,11 @@
   BaseMemoryLib
   MemoryAllocationLib
   HobLib
+  PciLib
 
 [Guids]
   gEfiSmmSmramMemoryGuid
+  gSmmRegisterInfoGuid
 
 [Protocols]
   gEfiSmmAccess2ProtocolGuid                    ## PRODUCES

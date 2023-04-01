@@ -6,6 +6,8 @@
   writting 0xB2 port with given value from SMM communication area.
   The paylaod SMM handler got chance to restore regs in S3 path.
 
+  Global TODO: Install SMI handler to handle SPI write-protect.
+
   Copyright (c) 2021, Intel Corporation. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -13,9 +15,14 @@
 
 #include <BlSupportSmm.h>
 
+#define B_SA_SMRAMC_D_LCK_MASK     (0x10)
+#define B_SA_SMRAMC_D_CLS_MASK     (0x20)
+#define B_SA_SMRAMC_D_OPEN_MASK    (0x40)
+
 PLD_S3_COMMUNICATION            mPldS3Hob;
 EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *mSmramHob         = NULL;
 PLD_SMM_REGISTERS               *mSmmRegisterHob   = NULL;
+UINT32                          mSmramcAddress = 0xFFFFFFFF;
 UINT64                          mSmmFeatureControl = 0;
 
 /**
@@ -186,6 +193,20 @@ SmmFeatureLockOnS3 (
 }
 
 /**
+  Set SMRAMC, if supported, on S3 path.
+
+**/
+VOID
+SetSmramcOnS3 (
+  VOID
+  )
+{
+  if (mSmramcAddress != 0xFFFFFFFF) {
+    PciOr8 (mSmramcAddress, B_SA_SMRAMC_D_LCK_MASK);
+  }
+}
+
+/**
   Function to program SMRR base and mask.
 
   @param[in] ProcedureArgument  Pointer to SMRR_BASE_MASK structure.
@@ -299,6 +320,7 @@ BlSwSmiHandler (
   )
 {
   SetSmrrOnS3 ();
+  SetSmramcOnS3 ();
   SmmFeatureLockOnS3 ();
   LockSmiGlobalEn ();
 
@@ -353,6 +375,7 @@ BlSupportSmm (
   EFI_HANDLE                     SwHandle;
   EFI_HOB_GUID_TYPE              *GuidHob;
   VOID                           *SmmHob;
+  PLD_GENERIC_REGISTER           *SmramcReg;
   VOID                           *Registration;
 
   //
@@ -399,6 +422,12 @@ BlSupportSmm (
     }
 
     CopyMem (mSmmRegisterHob, SmmHob, GET_GUID_HOB_DATA_SIZE (GuidHob));
+
+    SmramcReg = GetRegisterById (REGISTER_ID_SMRAMC);
+    if (SmramcReg != NULL) {
+      DEBUG ((DEBUG_INFO, "SMRAMC reg found.\n"));
+      mSmramcAddress = SmramcReg->Address.Address;
+    }
   } else {
     return EFI_NOT_FOUND;
   }

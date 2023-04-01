@@ -27,6 +27,7 @@ typedef EFI_ACPI_3_0_GENERIC_ADDRESS_STRUCTURE PLD_GENERIC_ADDRESS;
 #define REGISTER_ID_SMI_EOS          3
 #define REGISTER_ID_SMI_APM_EN       4
 #define REGISTER_ID_SMI_APM_STS      5
+#define REGISTER_ID_SMRAMC           6
 
 #pragma pack(1)
 typedef struct {

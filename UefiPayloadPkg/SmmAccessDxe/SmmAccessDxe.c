@@ -7,8 +7,14 @@
 **/
 
 #include "SmmAccessDxe.h"
+#include <Library/PciLib.h>
+
+#define B_SA_SMRAMC_D_LCK_MASK     (0x10)
+#define B_SA_SMRAMC_D_CLS_MASK     (0x20)
+#define B_SA_SMRAMC_D_OPEN_MASK    (0x40)
 
 SMM_ACCESS_PRIVATE_DATA  mSmmAccess;
+UINT32  mSmramcAddress = 0xFFFFFFFF;
 
 /**
    Update region state from SMRAM description
@@ -53,6 +59,8 @@ Open (
   IN EFI_SMM_ACCESS2_PROTOCOL  *This
   )
 {
+  UINT8  SmramControl;
+
   if ((mSmmAccess.SmmRegionState & EFI_SMRAM_LOCKED) != 0) {
     //
     // Cannot open a "locked" region
@@ -61,13 +69,33 @@ Open (
     return EFI_DEVICE_ERROR;
   }
 
+  //
+  // Chipset code
+  //
+  if (mSmramcAddress != 0xFFFFFFFF) {
+    SmramControl = PciRead8 (mSmramcAddress);
+
+    // Cannot open locked region
+    if ((SmramControl & B_SA_SMRAMC_D_LCK_MASK) != 0) {
+      mSmmAccess.SmmRegionState |= EFI_SMRAM_LOCKED;
+      SyncRegionState2SmramDesc (TRUE, EFI_SMRAM_LOCKED);
+
+      DEBUG ((DEBUG_WARN, "Cannot open a locked SMRAM region\n"));
+      return EFI_DEVICE_ERROR;
+    }
+
+    SmramControl |= B_SA_SMRAMC_D_OPEN_MASK;
+    SmramControl &= ~(B_SA_SMRAMC_D_CLS_MASK);
+    PciWrite8 (mSmramcAddress, SmramControl);
+  }
+
   mSmmAccess.SmmRegionState &= ~(EFI_SMRAM_CLOSED | EFI_ALLOCATED);
   SyncRegionState2SmramDesc (FALSE, (UINT64)(UINTN)(~(EFI_SMRAM_CLOSED | EFI_ALLOCATED)));
 
   mSmmAccess.SmmRegionState |= EFI_SMRAM_OPEN;
   SyncRegionState2SmramDesc (TRUE, EFI_SMRAM_OPEN);
-  mSmmAccess.SmmAccess.OpenState = TRUE;
 
+  mSmmAccess.SmmAccess.OpenState = TRUE;
   return EFI_SUCCESS;
 }
 
@@ -91,6 +119,8 @@ Close (
   IN EFI_SMM_ACCESS2_PROTOCOL  *This
   )
 {
+  UINT8  SmramControl;
+
   if ((mSmmAccess.SmmRegionState & EFI_SMRAM_LOCKED) != 0) {
     //
     // Cannot close a "locked" region
@@ -101,6 +131,25 @@ Close (
 
   if ((mSmmAccess.SmmRegionState & EFI_SMRAM_CLOSED) != 0) {
     return EFI_DEVICE_ERROR;
+  }
+
+  //
+  // Chipset code
+  //
+  if (mSmramcAddress != 0xFFFFFFFF) {
+    SmramControl = PciRead8 (mSmramcAddress);
+
+    // Cannot open locked region
+    if ((SmramControl & B_SA_SMRAMC_D_LCK_MASK) != 0) {
+      mSmmAccess.SmmRegionState |= EFI_SMRAM_LOCKED;
+      SyncRegionState2SmramDesc (TRUE, EFI_SMRAM_LOCKED);
+
+      DEBUG ((DEBUG_WARN, "Cannot close a locked SMRAM region\n"));
+      return EFI_DEVICE_ERROR;
+    }
+
+    SmramControl &= ~(B_SA_SMRAMC_D_OPEN_MASK);
+    PciWrite8 (mSmramcAddress, SmramControl);
   }
 
   mSmmAccess.SmmRegionState &= ~EFI_SMRAM_OPEN;
@@ -142,6 +191,14 @@ Lock (
   mSmmAccess.SmmRegionState |= EFI_SMRAM_LOCKED;
   SyncRegionState2SmramDesc (TRUE, EFI_SMRAM_LOCKED);
   mSmmAccess.SmmAccess.LockState = TRUE;
+
+  //
+  // Chipset code
+  //
+  if (mSmramcAddress != 0xFFFFFFFF) {
+    PciOr8 (mSmramcAddress, B_SA_SMRAMC_D_LCK_MASK);
+  }
+
   return EFI_SUCCESS;
 }
 
@@ -185,6 +242,33 @@ GetCapabilities (
 }
 
 /**
+  Get specified SMI register based on given register ID
+
+  @param[in]  SmmRegister  SMI related register array from bootloader
+  @param[in]  Id           The register ID to get.
+
+  @retval NULL             The register is not found
+  @return smi register
+
+**/
+PLD_GENERIC_REGISTER *
+GetRegisterById (
+  PLD_SMM_REGISTERS  *SmmRegisters,
+  UINT64             Id
+  )
+{
+  UINT32  Index;
+
+  for (Index = 0; Index < SmmRegisters->Count; Index++) {
+    if (SmmRegisters->Registers[Index].Id == Id) {
+      return &SmmRegisters->Registers[Index];
+    }
+  }
+
+  return NULL;
+}
+
+/**
   This function installs EFI_SMM_ACCESS_PROTOCOL.
 
   @param  ImageHandle Handle for the image of this driver
@@ -206,6 +290,8 @@ SmmAccessEntryPoint (
   UINT32                          SmmRegionNum;
   EFI_SMRAM_HOB_DESCRIPTOR_BLOCK  *SmramHob;
   UINT32                          Index;
+  PLD_SMM_REGISTERS               *SmmRegisters;
+  PLD_GENERIC_REGISTER            *SmramcReg;
 
   //
   // Get SMRAM info HOB
@@ -237,6 +323,21 @@ SmmAccessEntryPoint (
       ));
     mSmmAccess.SmramDesc[Index].RegionState &= EFI_ALLOCATED;
     mSmmAccess.SmramDesc[Index].RegionState |= EFI_SMRAM_CLOSED | EFI_CACHEABLE;
+  }
+
+  //
+  // Some platforms require to open/close SMRAMC register
+  // Supports PCH, not ICH (QEMU)
+  //
+  GuidHob = GetFirstGuidHob (&gSmmRegisterInfoGuid);
+  if (GuidHob != NULL) {
+    SmmRegisters = GET_GUID_HOB_DATA (GuidHob);
+
+    SmramcReg = GetRegisterById (SmmRegisters, REGISTER_ID_SMRAMC);
+    if (SmramcReg != NULL) {
+      DEBUG ((DEBUG_INFO, "SMRAMC reg found.\n"));
+      mSmramcAddress = SmramcReg->Address.Address;
+    }
   }
 
   mSmmAccess.Signature                 = SMM_ACCESS_PRIVATE_DATA_SIGNATURE;

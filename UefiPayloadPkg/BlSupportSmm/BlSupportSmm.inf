@@ -33,6 +33,7 @@
   MemoryAllocationLib
   BaseLib
   IoLib
+  PciLib
   HobLib
 
 [Guids]
