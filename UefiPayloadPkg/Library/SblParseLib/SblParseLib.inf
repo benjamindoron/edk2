@@ -43,6 +43,11 @@
   gUniversalPayloadPciRootBridgeInfoGuid
   gUniversalPayloadSmbiosTableGuid
   gUniversalPayloadAcpiTableGuid
+  gSmmRegisterInfoGuid
+  gEfiSmmSmramMemoryGuid
+  gSpiFlashInfoGuid
+  gNvVariableInfoGuid
+  gS3CommunicationGuid
 
 [Pcd]
   gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter
