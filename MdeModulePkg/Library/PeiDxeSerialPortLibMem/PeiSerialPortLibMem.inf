@@ -1,0 +1,40 @@
+## @file
+#  In-memory SerialPortLib instance.
+#
+#  Copyright (c) 2021, Baruch Binyamin Doron
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PeiSerialPortLibMem
+  FILE_GUID                      = 2C171210-3997-45B3-BA1E-D8B8713C138E
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  # Recall that debug logging can be unsafe to PEI core. Route over RSC.
+  LIBRARY_CLASS                  = SerialPortLib|PEI_CORE PEIM
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  HobLib
+  PeiServicesLib
+
+[Sources]
+  PeiSerialPortLibMem.c
+  SerialPortLibMem.h
+  SerialPortLibMemCommon.c
+
+[Guids]
+  gDebugLogRingbufferGuid                                    ## CONSUMES ## HOB
+
+[Pcd]
+  # FIXME: Libraries can't have fixed PCD overrides, so put my settings here
+  gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeMemorySize|48  ## CONSUMES
+
+[Ppis]
+  gEfiPeiMemoryDiscoveredPpiGuid                             ## CONSUMES

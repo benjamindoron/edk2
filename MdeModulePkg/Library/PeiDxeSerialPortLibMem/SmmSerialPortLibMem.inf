@@ -1,0 +1,37 @@
+## @file
+#  In-memory SerialPortLib instance.
+#
+#  Copyright (c) 2021, Baruch Binyamin Doron
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SmmSerialPortLibMem
+  FILE_GUID                      = DA0BE536-CD47-408E-AEB0-377C05FBDB8A
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  # Recall that debug logging can be unsafe to core. Route over RSC.
+  LIBRARY_CLASS                  = SerialPortLib|SMM_CORE DXE_SMM_DRIVER
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  SmmMemLib
+  UefiLib
+
+[Sources]
+  SmmSerialPortLibMem.c
+  SerialPortLibMem.h
+  SerialPortLibMemCommon.c
+
+[Guids]
+  gDebugLogRingbufferGuid                                      ## CONSUMES ## GUID
+
+[Pcd]
+  # FIXME: Libraries can't have fixed PCD overrides, so put my settings here
+  gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeMemorySize|1024  ## CONSUMES

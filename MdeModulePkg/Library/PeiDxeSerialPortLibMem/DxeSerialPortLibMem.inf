@@ -1,0 +1,41 @@
+## @file
+#  In-memory SerialPortLib instance.
+#
+#  Copyright (c) 2021, Baruch Binyamin Doron
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DxeSerialPortLibMem
+  FILE_GUID                      = 9E9DB50E-8445-4CEE-BA3B-EB016F2DD8E0
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  # Recall that debug logging can be unsafe to core. Route over RSC.
+  LIBRARY_CLASS                  = SerialPortLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  MemoryAllocationLib
+  HobLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  UefiLib
+
+[Sources]
+  DxeSerialPortLibMem.c
+  SerialPortLibMem.h
+  SerialPortLibMemCommon.c
+
+[Guids]
+  gDebugLogRingbufferGuid                                      ## CONSUMES ## GUID
+  gEfiEventExitBootServicesGuid                                ## CONSUMES ## Event
+
+[Pcd]
+  # FIXME: Libraries can't have fixed PCD overrides, so put my settings here
+  gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeMemorySize|1024  ## CONSUMES
