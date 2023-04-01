@@ -20,6 +20,7 @@
 #include <Guid/SpiFlashWindowInfoGuid.h>
 #include <IndustryStandard/Acpi.h>
 #include <Coreboot.h>
+#include "PayloadMmParser.h"
 
 /**
   Convert a packed value from cbuint64 to a UINT64 value.
@@ -670,6 +671,8 @@ ParseMiscInfo (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to find SPI flash tables\n"));
   }
+
+  ParsePayloadMmFeatureInfo ();
 
   return RETURN_SUCCESS;
 }
