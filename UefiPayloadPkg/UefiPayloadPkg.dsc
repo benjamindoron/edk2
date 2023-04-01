@@ -121,7 +121,7 @@
   DEFINE PLATFORM_BOOT_TIMEOUT        = 3
 
   #
-  # Shell options: [BUILD_SHELL, MIN_BIN, NONE, UEFI_BIN]
+  # Shell options: [BUILD_SHELL, NONE]
   #
   DEFINE SHELL_TYPE                   = BUILD_SHELL
 
@@ -163,8 +163,8 @@
   #
   # PS/2 options
   #
-  DEFINE SIO_BUS_ENABLE               = FALSE
-  DEFINE PS2_KEYBOARD_ENABLE          = FALSE
+  DEFINE SIO_BUS_ENABLE               = TRUE
+  DEFINE PS2_KEYBOARD_ENABLE          = TRUE
   DEFINE PS2_MOUSE_ENABLE             = TRUE
 
   # Define RTC related register.
@@ -999,9 +999,7 @@
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
 !endif
   PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
-!if $(EMU_VARIABLE_ENABLE) == TRUE
-  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
-!endif
+
   #
   # Following are the DXE drivers
   #
@@ -1301,7 +1299,6 @@
   #
 [LibraryClasses]
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
-  DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
   ShellLib|ShellPkg/Library/UefiShellLib/UefiShellLib.inf
   !include NetworkPkg/NetworkLibs.dsc.inc
@@ -1338,6 +1335,7 @@
       NULL|ShellPkg/Library/UefiShellDriver1CommandsLib/UefiShellDriver1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellInstall1CommandsLib/UefiShellInstall1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
+      NULL|ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
 
     #------------------------------
     #  Networking commands
@@ -1351,13 +1349,11 @@
     #------------------------------
 
     <LibraryClasses>
-      DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
       HandleParsingLib|ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf
       OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
       ShellCEntryLib|ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.inf
       ShellCommandLib|ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf
-      SortLib|MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
   }
 
 !endif

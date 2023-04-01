@@ -17,8 +17,8 @@ DEFINE FD_BLOCK_SIZE = 0x00001000
 DEFINE FD_SIZE     = 0x00850000
 DEFINE NUM_BLOCKS  = 0x850
 !else
-DEFINE FD_SIZE     = 0x00700000
-DEFINE NUM_BLOCKS  = 0x700
+DEFINE FD_SIZE     = 0x00800000
+DEFINE NUM_BLOCKS  = 0x800
 !endif
 
 ################################################################################
@@ -59,6 +59,7 @@ INF UefiPayloadPkg/UefiPayloadEntry/UefiPayloadEntry.inf
 FILE FV_IMAGE = 4E35FD93-9C72-4c15-8C4B-E77F1DB2D793 {
     SECTION FV_IMAGE = DXEFV
 }
+
 !if $(UNIVERSAL_PAYLOAD) == TRUE
 !if $(NETWORK_DRIVER_ENABLE) == TRUE
 ################################################################################
@@ -372,6 +373,7 @@ INF  MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResour
 INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
 INF RuleOverride = UI MdeModulePkg/Application/UiApp/UiApp.inf
 INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
+
 #
 # UEFI network modules
 #
