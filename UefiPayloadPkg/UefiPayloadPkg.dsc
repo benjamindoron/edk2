@@ -178,6 +178,8 @@
   # Debug options
   #
   DEFINE SOURCE_DEBUG_ENABLE          = FALSE
+  DEFINE SOURCE_DEBUG_USE_USB         = FALSE
+  DEFINE SOURCE_DEBUG_USE_USB3        = FALSE
   DEFINE MULTIPLE_DEBUG_PORT_SUPPORT  = FALSE
   DEFINE USE_CBMEM_FOR_CONSOLE        = FALSE
 
@@ -362,7 +364,11 @@
   ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   PeCoffExtraActionLib|SourceLevelDebugPkg/Library/PeCoffExtraActionLibDebug/PeCoffExtraActionLibDebug.inf
+!if $(SOURCE_DEBUG_USE_USB) == TRUE
+  DebugCommunicationLib|SourceLevelDebugPkg/Library/DebugCommunicationLibUsb/DebugCommunicationLibUsb.inf
+!elseif $(SOURCE_DEBUG_USE_USB3) == FALSE
   DebugCommunicationLib|SourceLevelDebugPkg/Library/DebugCommunicationLibSerialPort/DebugCommunicationLibSerialPort.inf
+!endif
 !else
   PeCoffExtraActionLib|MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf
   DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
@@ -518,6 +524,9 @@
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/DxeDebugAgentLib.inf
+!if $(SOURCE_DEBUG_USE_USB3) == TRUE
+  DebugCommunicationLib|SourceLevelDebugPkg/Library/DebugCommunicationLibUsb3/DebugCommunicationLibUsb3Dxe.inf
+!endif
 !endif
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
   PerformanceLib|MdeModulePkg/Library/DxeCorePerformanceLib/DxeCorePerformanceLib.inf
@@ -529,6 +538,9 @@
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/DxeDebugAgentLib.inf
+!if $(SOURCE_DEBUG_USE_USB3) == TRUE
+  DebugCommunicationLib|SourceLevelDebugPkg/Library/DebugCommunicationLibUsb3/DebugCommunicationLibUsb3Dxe.inf
+!endif
 !endif
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
