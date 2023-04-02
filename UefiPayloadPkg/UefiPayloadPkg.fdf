@@ -354,6 +354,14 @@ INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
 !endif
 
 #
+# Security
+#
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+!endif
+
+
+#
 # Shell
 #
 !if $(SHELL_TYPE) == BUILD_SHELL

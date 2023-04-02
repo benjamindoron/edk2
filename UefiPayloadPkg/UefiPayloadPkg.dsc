@@ -65,6 +65,11 @@
   DEFINE   BOOTLOADER                 = SBL
 
   #
+  # Security options
+  #
+  DEFINE SECURE_BOOT_ENABLE           = FALSE
+
+  #
   # CPU options
   #
   DEFINE MAX_LOGICAL_PROCESSORS       = 1024
@@ -309,17 +314,29 @@
   !endif
 !endif
 
+  #
+  # API
+  #
   DebugLib|MdeModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
   LockBoxLib|MdeModulePkg/Library/LockBoxNullLib/LockBoxNullLib.inf
   FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  PlatformSecureLib|OvmfPkg/Library/PlatformSecureLib/PlatformSecureLib.inf
+  AuthVariableLib|SecurityPkg/Library/AuthVariableLib/AuthVariableLib.inf
+  SecureBootVariableLib|SecurityPkg/Library/SecureBootVariableLib/SecureBootVariableLib.inf
+  PlatformPKProtectionLib|SecurityPkg/Library/PlatformPKProtectionLibVarPolicy/PlatformPKProtectionLibVarPolicy.inf
+  SecureBootVariableProvisionLib|SecurityPkg/Library/SecureBootVariableProvisionLib/SecureBootVariableProvisionLib.inf
+!else
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+!endif
+
 !if $(VARIABLE_SUPPORT) == "EMU"
   TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
 !elseif $(VARIABLE_SUPPORT) == "SMMSTORE"
   SmmStoreLib|UefiPayloadPkg/Library/SmmStoreLib/SmmStoreLib.inf
   TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
 !elseif $(VARIABLE_SUPPORT) == "SPI"
-  PlatformSecureLib|SecurityPkg/Library/PlatformSecureLibNull/PlatformSecureLibNull.inf
   TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
   S3BootScriptLib|MdePkg/Library/BaseS3BootScriptLibNull/BaseS3BootScriptLibNull.inf
   MmUnblockMemoryLib|MdePkg/Library/MmUnblockMemoryLib/MmUnblockMemoryLibNull.inf
@@ -382,6 +399,9 @@
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 !if $(PERFORMANCE_MEASUREMENT_ENABLE)
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
+!endif
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
 !endif
 
 [LibraryClasses.common.UEFI_DRIVER,LibraryClasses.common.UEFI_APPLICATION]
@@ -493,6 +513,9 @@
   gEfiCryptoPkgTokenSpaceGuid.PcdCryptoServiceFamilyEnable.TlsSet.Family                            | PCD_CRYPTO_SERVICE_ENABLE_FAMILY
   gEfiCryptoPkgTokenSpaceGuid.PcdCryptoServiceFamilyEnable.TlsGet.Family                            | PCD_CRYPTO_SERVICE_ENABLE_FAMILY
 !endif
+
+  # Enable user to customise Secure Boot keys
+  gEfiSecurityPkgTokenSpaceGuid.PcdUserPhysicalPresence|TRUE
 
 [PcdsPatchableInModule.X64]
 !if $(NETWORK_DRIVER_ENABLE) == TRUE
@@ -670,7 +693,12 @@
   # Components that produce the architectural protocols
   #
 !if $(SECURITY_STUB_ENABLE) == TRUE
-  MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
+  MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
+    <LibraryClasses>
+    !if $(SECURE_BOOT_ENABLE) == TRUE
+      NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
+    !endif
+  }
 !endif
   UefiCpuPkg/CpuDxe/CpuDxe.inf
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
@@ -871,6 +899,13 @@
       BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
       TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
   }
+!endif
+
+  #
+  # Security
+  #
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
 
   #------------------------------
