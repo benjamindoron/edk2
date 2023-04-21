@@ -52,6 +52,7 @@
   gUniversalPayloadSerialPortInfoGuid
   gVariableFlashInfoHobGuid
   gEdkiiVariableRuntimeCacheInfoHobGuid
+  gEfiCfrSetupMenuFormGuid
 
 [Pcd]
   gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter

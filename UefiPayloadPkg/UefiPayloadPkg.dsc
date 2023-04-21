@@ -122,6 +122,8 @@
   DEFINE BOOT_MANAGER_ESCAPE          = FALSE
   DEFINE PLATFORM_BOOT_TIMEOUT        = 3
 
+  DEFINE CFR_SETUP_MENU_ENABLE        = FALSE
+
   #
   # Shell options: [BUILD_SHELL, NONE]
   #
@@ -396,6 +398,9 @@
   !endif
 !endif
   PayloadMmHelperLib|UefiPayloadPkg/Library/PayloadMmHelperLib/PayloadMmHelperLib.inf
+!if $(CFR_SETUP_MENU_ENABLE) == TRUE
+  CfrHelpersLib|UefiPayloadPkg/Library/CfrHelpersLib/CfrHelpersLib.inf
+!endif
 
   ReportStatusCodeLib|MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf
   DebugLib|MdeModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
@@ -1098,6 +1103,10 @@
 !endif
   }
   MdeModulePkg/Universal/EsrtDxe/EsrtDxe.inf
+!endif
+
+!if $(CFR_SETUP_MENU_ENABLE) == TRUE
+  UefiPayloadPkg/CfrSetupMenuDxe/CfrSetupMenuDxe.inf
 !endif
 
   MdeModulePkg/Universal/Metronome/Metronome.inf
