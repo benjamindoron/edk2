@@ -360,6 +360,14 @@ struct lb_pld_s3_communication {
   UINT8  pad[3];
 };
 
+#define CB_TAG_CFR_ROOT  0x0100
+struct cb_cfr {
+  UINT32 tag;
+  UINT32 size;
+  UINT32 checksum;  /* Of the entire structure with this field set to 0 */
+  /* CFR_FORM forms[] */
+};
+
 /* Helpful macros */
 
 #define MEM_RANGE_COUNT(_rec) \

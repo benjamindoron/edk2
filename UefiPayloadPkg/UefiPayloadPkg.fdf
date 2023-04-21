@@ -220,6 +220,10 @@ INF MdeModulePkg/Universal/PlatformDriOverrideDxe/PlatformDriOverrideDxe.inf
 INF MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
 INF UefiPayloadPkg/BlSupportDxe/BlSupportDxe.inf
 
+!if $(CFR_SETUP_MENU_ENABLE) == TRUE
+INF UefiPayloadPkg/CfrSetupMenuDxe/CfrSetupMenuDxe.inf
+!endif
+
 INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
 !if $(BOOTSPLASH_IMAGE)
 INF MdeModulePkg/Logo/LogoDxe.inf

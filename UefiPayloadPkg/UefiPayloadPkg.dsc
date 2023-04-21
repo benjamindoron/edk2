@@ -33,6 +33,7 @@
   DEFINE SMM_SUPPORT                  = FALSE
   DEFINE PLATFORM_BOOT_TIMEOUT        = 3
   DEFINE BOOT_MANAGER_ESCAPE          = FALSE
+  DEFINE CFR_SETUP_MENU_ENABLE        = TRUE
   DEFINE ATA_ENABLE                   = TRUE
   DEFINE SD_ENABLE                    = TRUE
   DEFINE PS2_MOUSE_ENABLE             = TRUE
@@ -336,6 +337,9 @@
   !else
     BlParseLib|UefiPayloadPkg/Library/SblParseLib/SblParseLib.inf
   !endif
+!endif
+!if $(CFR_SETUP_MENU_ENABLE) == TRUE
+  CfrHelpersLib|UefiPayloadPkg/Library/CfrHelpersLib/CfrHelpersLib.inf
 !endif
 
   #
@@ -787,6 +791,9 @@
   }
 !if $(BOOTSPLASH_IMAGE)
   MdeModulePkg/Logo/LogoDxe.inf
+!endif
+!if $(CFR_SETUP_MENU_ENABLE) == TRUE
+  UefiPayloadPkg/CfrSetupMenuDxe/CfrSetupMenuDxe.inf
 !endif
   MdeModulePkg/Application/UiApp/UiApp.inf {
     <LibraryClasses>

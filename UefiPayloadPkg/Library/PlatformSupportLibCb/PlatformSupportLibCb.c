@@ -7,11 +7,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <PiPei.h>
+#include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/BlParseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/HobLib.h>
 #include <Library/PlatformSupportLib.h>
+#include <Guid/CfrSetupMenuGuid.h>
 #include <Guid/SmmStoreInfoGuid.h>
 #include <Guid/TcgPhysicalPresenceGuid.h>
 #include <Coreboot.h>
@@ -142,6 +144,13 @@ ParsePlatformInfo (
   SMMSTORE_INFO               *NewSmmStoreInfo;
   TCG_PHYSICAL_PRESENCE_INFO  PhysicalPresenceInfo;
   TCG_PHYSICAL_PRESENCE_INFO  *NewPhysicalPresenceInfo;
+  struct cb_cfr               *CbCfrSetupMenu;
+  UINT32                      CbCfrChecksum;
+  UINT32                      CfrCalculatedChecksum;
+  UINTN                       ProcessedLength;
+  CFR_OPTION_FORM             *CbCfrOuterFormOffset;
+  CFR_OPTION_FORM             *CfrSetupMenuForm;
+  CFR_VARBINARY               *CfrFormName;
 
   //
   // Create guid hob for SmmStore
@@ -163,6 +172,54 @@ ParsePlatformInfo (
     ASSERT (NewPhysicalPresenceInfo != NULL);
     CopyMem (NewPhysicalPresenceInfo, &PhysicalPresenceInfo, sizeof (PhysicalPresenceInfo));
     DEBUG ((DEBUG_INFO, "Created Tcg Physical Presence info hob\n"));
+  }
+
+  //
+  // CFR has several CB tags, though these are nested structures,
+  // not for individual table-to-HOB conversion
+  //
+  CbCfrSetupMenu = FindCbTag (CB_TAG_CFR_ROOT);
+  if (CbCfrSetupMenu != NULL) {
+    //
+    // Checksums with this field set to "0"
+    //
+    CbCfrChecksum = CbCfrSetupMenu->checksum;
+    CbCfrSetupMenu->checksum = 0;
+    CfrCalculatedChecksum = CalculateCrc32 (CbCfrSetupMenu, CbCfrSetupMenu->size);
+    CbCfrSetupMenu->checksum = CbCfrChecksum;
+
+    if (CfrCalculatedChecksum != CbCfrChecksum) {
+      DEBUG ((DEBUG_WARN, "CFR: Calculated CRC32 0x%x does not match stored CRC32 0x%x!\n", CfrCalculatedChecksum, CbCfrChecksum));
+    }
+
+    ProcessedLength = sizeof (struct cb_cfr);
+
+    //
+    // Copy each form to HOB; TODO: This creates duplicate, copy pointer?
+    //
+    while (ProcessedLength < CbCfrSetupMenu->size) {
+      CbCfrOuterFormOffset = (CFR_OPTION_FORM *)((UINT8 *)CbCfrSetupMenu + ProcessedLength);
+      CfrSetupMenuForm = BuildGuidDataHob (
+                            &gEfiCfrSetupMenuFormGuid,
+                            CbCfrOuterFormOffset,
+                            CbCfrOuterFormOffset->size
+                            );
+      if (CfrSetupMenuForm == NULL) {
+        break;
+      }
+      ASSERT (CfrSetupMenuForm->tag == CB_TAG_CFR_OPTION_FORM);
+
+      CfrFormName = (CFR_VARBINARY *)((UINT8 *)CfrSetupMenuForm + sizeof (CFR_OPTION_FORM));
+      DEBUG ((
+        DEBUG_INFO,
+        "CFR: Found form[%d] \"%a\" of %d bytes\n",
+        CfrSetupMenuForm->object_id,
+        CfrFormName->data,
+        CfrSetupMenuForm->size
+        ));
+
+      ProcessedLength += CfrSetupMenuForm->size;
+    }
   }
 
   return EFI_SUCCESS;

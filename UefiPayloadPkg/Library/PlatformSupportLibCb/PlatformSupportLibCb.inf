@@ -29,6 +29,7 @@
   UefiPayloadPkg/UefiPayloadPkg.dec
 
 [LibraryClasses]
+  BaseLib
   BaseMemoryLib
   BlParseLib
   DebugLib
@@ -37,3 +38,4 @@
 [Guids]
   gEfiSmmStoreInfoHobGuid
   gEfiTcgPhysicalPresenceInfoHobGuid
+  gEfiCfrSetupMenuFormGuid
