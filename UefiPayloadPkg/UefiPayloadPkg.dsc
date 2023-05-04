@@ -182,6 +182,8 @@
   DEFINE SOURCE_DEBUG_ENABLE          = FALSE
   DEFINE SOURCE_DEBUG_USE_USB         = FALSE
   DEFINE SOURCE_DEBUG_USE_USB3        = FALSE
+  DEFINE RELEASE_LOGGING              = FALSE
+  DEFINE ENABLE_DEBUG_CODE            = FALSE
   DEFINE MULTIPLE_DEBUG_PORT_SUPPORT  = FALSE
   DEFINE USE_CBMEM_FOR_CONSOLE        = FALSE
 
@@ -227,7 +229,7 @@
 
 [BuildOptions]
   *_*_*_CC_FLAGS                 = -D DISABLE_NEW_DEPRECATED_INTERFACES
-!if $(USE_CBMEM_FOR_CONSOLE) == FALSE
+!if $(RELEASE_LOGGING) == FALSE
   GCC:RELEASE_*_*_CC_FLAGS       = -DMDEPKG_NDEBUG
   INTEL:RELEASE_*_*_CC_FLAGS     = /D MDEPKG_NDEBUG
   MSFT:RELEASE_*_*_CC_FLAGS      = /D MDEPKG_NDEBUG
@@ -702,6 +704,30 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0x21, 0xaa, 0x2c, 0x46, 0x14, 0x76, 0x03, 0x45, 0x83, 0x6e, 0x8a, 0xb6, 0xf4, 0x66, 0x23, 0x31 }
   gUefiPayloadPkgTokenSpaceGuid.PcdPcdDriverFile|{ 0x57, 0x72, 0xcf, 0x80, 0xab, 0x87, 0xf9, 0x47, 0xa3, 0xfe, 0xD5, 0x0B, 0x76, 0xd8, 0x95, 0x41 }
 
+  #
+  # Build the PcdDebugPropertyMask from build flags
+  #
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x03
+!if $(RELEASE_LOGGING) == TRUE
+  !if $(ENABLE_DEBUG_CODE) == TRUE
+    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x07
+  !endif
+!else
+  !if $(SOURCE_DEBUG_ENABLE) == TRUE
+    !if $(ENABLE_DEBUG_CODE) == TRUE
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x17
+    !else
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x13
+    !endif
+  !else
+    !if $(ENABLE_DEBUG_CODE) == TRUE
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2F
+    !else
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2B
+    !endif
+  !endif
+!endif
+
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   gEfiSourceLevelDebugPkgTokenSpaceGuid.PcdDebugLoadImageMethod|0x2
 !endif
@@ -786,19 +812,6 @@
 
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x7
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000004F
-!if $(USE_CBMEM_FOR_CONSOLE) == FALSE
-  !if $(SOURCE_DEBUG_ENABLE) == TRUE
-    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x17
-  !else
-    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2F
-  !endif
-!else
-  !if $(TARGET) == DEBUG
-    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x07
-  !else
-    gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x03
-  !endif
-!endif
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxSizeNonPopulateCapsule|$(MAX_SIZE_NON_POPULATE_CAPSULE)
 
   #
