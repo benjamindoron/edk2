@@ -249,6 +249,27 @@ struct cb_cbmem_tab {
   UINT64    cbmem_tab;
 };
 
+#define CB_TAG_FMAP  0x0037
+#define FMAP_STRLEN  32          /* includes null-terminator */
+struct fmap_area {
+  UINT32 offset;                /* offset relative to base */
+  UINT32 size;                  /* size in bytes */
+  UINT8  name[FMAP_STRLEN];     /* descriptive name */
+  UINT16 flags;                 /* flags for this area */
+} __attribute__ ((packed));
+
+struct fmap {
+  UINT8  signature[8];       /* "__FMAP__" (0x5F5F464D41505F5F) */
+  UINT8  ver_major;          /* major version */
+  UINT8  ver_minor;          /* minor version */
+  UINT64 base;               /* address of the firmware binary */
+  UINT32 size;               /* size of firmware binary in bytes */
+  UINT8  name[FMAP_STRLEN];  /* name of this firmware binary */
+  UINT16 nareas;             /* number of areas described by
+                                fmap_areas[] below */
+  struct fmap_area areas[];
+} __attribute__ ((packed));
+
 /* Helpful macros */
 
 #define MEM_RANGE_COUNT(_rec) \

@@ -1,0 +1,28 @@
+## @file
+#  Contains helper functions for parsing FMAP.
+#
+#  Copyright (c) 2023, 9elements GmbH.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CbFmapParserLib
+  FILE_GUID                      = 6B4EE7FA-413A-445A-91B2-E63F3106FDE3
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = FmapParserLib
+
+[Sources]
+  CbFmapParserLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiPayloadPkg/UefiPayloadPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BlParseLib
+  DebugLib
