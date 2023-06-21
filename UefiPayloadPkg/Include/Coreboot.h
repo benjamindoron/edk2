@@ -249,6 +249,57 @@ struct cb_cbmem_tab {
   UINT64    cbmem_tab;
 };
 
+#define CB_TAG_SPI_FLASH  0x0029
+/* Memory map windows to translate addresses between SPI flash space and host address space. */
+struct flash_mmap_window {
+  UINT32    flash_base;
+  UINT32    host_base;
+  UINT32    size;
+} __attribute__ ((packed));
+
+struct cb_spi_flash {
+  UINT32                      tag;
+  UINT32                      size;
+  UINT32                      flash_size;
+  UINT32                      sector_size;
+  /*
+   * Note: `erase_cmd` was previously a uint32_t. It's now uint8_t because only
+   * the lowest byte was used, ensuring backward compatibility with older coreboot
+   * tables and allowing reuse of the remaining bytes.
+   */
+  UINT8                       erase_cmd;
+#define CB_SPI_FLASH_FLAG_IN_4BYTE_ADDR_MODE    (1 << 0)
+  UINT8                       flags;
+  UINT16                      reserved;
+  /*
+   * Number of mmap windows used by the platform to decode addresses between SPI flash
+   * space and host address space. This determines the number of entries in mmap_table.
+   */
+  UINT32                      mmap_count;
+  struct flash_mmap_window    mmap_table[];
+} __attribute__ ((packed));
+
+#define CB_TAG_FMAP  0x0037
+#define FMAP_STRLEN  32         /* includes null-terminator */
+struct fmap_area {
+  UINT32    offset;                /* offset relative to base */
+  UINT32    size;                  /* size in bytes */
+  UINT8     name[FMAP_STRLEN];     /* descriptive name */
+  UINT16    flags;                 /* flags for this area */
+} __attribute__ ((packed));
+
+struct fmap {
+  UINT8               signature[8];       /* "__FMAP__" (0x5F5F464D41505F5F) */
+  UINT8               ver_major;          /* major version */
+  UINT8               ver_minor;          /* minor version */
+  UINT64              base;               /* address of the firmware binary */
+  UINT32              size;               /* size of firmware binary in bytes */
+  UINT8               name[FMAP_STRLEN];  /* name of this firmware binary */
+  UINT16              nareas;             /* number of areas described by
+                                             fmap_areas[] below */
+  struct fmap_area    areas[];
+} __attribute__ ((packed));
+
 #define CB_TAG_SMMSTOREV2  0x0039
 struct cb_smmstorev2 {
   UINT32    tag;

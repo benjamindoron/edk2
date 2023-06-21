@@ -31,10 +31,14 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
-  IoLib
   DebugLib
   PcdLib
+  HobLib
   PrintLib
+
+[Guids]
+  gEfiSpiFlashWindowInfoHobGuid
+  gEfiFlashRegionMapInfoHobGuid
 
 [Pcd]
   gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter

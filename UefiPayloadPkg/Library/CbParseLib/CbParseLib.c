@@ -10,12 +10,14 @@
 #include <Uefi/UefiBaseType.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BlParseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
-#include <Library/IoLib.h>
-#include <Library/BlParseLib.h>
+#include <Library/HobLib.h>
 #include <Library/PrintLib.h>
 #include <Library/SmmStoreParseLib.h>
+#include <Guid/FlashRegionMapInfoGuid.h>
+#include <Guid/SpiFlashWindowInfoGuid.h>
 #include <IndustryStandard/Acpi.h>
 #include <Coreboot.h>
 
@@ -582,6 +584,73 @@ ParseGfxDeviceInfo (
 }
 
 /**
+  Parse coreboot's SPI flash window and FMAP area information.
+
+**/
+RETURN_STATUS
+ParseFlashInfo (
+  VOID
+  )
+{
+  struct cb_spi_flash    *BlSpiFlash;
+  SPI_FLASH_WINDOW_INFO  *PldSpiFlash;
+  UINTN                  Index;
+  struct cb_cbmem_ref    *CbFmapRef;
+  struct fmap            *BlFmap;
+  FLASH_REGION_MAP_INFO  *PldFmap;
+
+  BlSpiFlash = FindCbTag (CB_TAG_SPI_FLASH);
+  if (BlSpiFlash != NULL) {
+    PldSpiFlash = BuildGuidHob (&gEfiSpiFlashWindowInfoHobGuid, sizeof (SPI_FLASH_WINDOW_INFO) + BlSpiFlash->mmap_count * sizeof (FLASH_MMAP_WINDOW));
+    if (PldSpiFlash != NULL) {
+      PldSpiFlash->FlashSize = BlSpiFlash->flash_size;
+      PldSpiFlash->SectorSize = BlSpiFlash->sector_size;
+      PldSpiFlash->EraseCmd = BlSpiFlash->erase_cmd;
+      PldSpiFlash->Flags = BlSpiFlash->flags;
+
+      PldSpiFlash->MmapCount = BlSpiFlash->mmap_count;
+      for (Index = 0; Index < BlSpiFlash->mmap_count; Index++) {
+        PldSpiFlash->MmapTable[Index].FlashBase = BlSpiFlash->mmap_table[Index].flash_base;
+        PldSpiFlash->MmapTable[Index].HostBase = BlSpiFlash->mmap_table[Index].host_base;
+        PldSpiFlash->MmapTable[Index].Size = BlSpiFlash->mmap_table[Index].size;
+      }
+
+      DEBUG ((DEBUG_INFO, "Created SPI flash window map HOB\n"));
+    }
+  }
+
+  CbFmapRef = FindCbTag (CB_TAG_FMAP);
+  if (CbFmapRef != NULL) {
+    BlFmap = (VOID *)(UINTN)CbFmapRef->cbmem_addr;
+    PldFmap = BuildGuidHob (&gEfiFlashRegionMapInfoHobGuid, sizeof (FLASH_REGION_MAP_INFO) + BlFmap->nareas * sizeof (FMAP_AREA));
+    if (PldFmap != NULL) {
+      CopyMem (&PldFmap->Signature, &BlFmap->signature, sizeof (PldFmap->Signature));
+      PldFmap->MajorVersion = BlFmap->ver_major;
+      PldFmap->MinorVersion = BlFmap->ver_minor;
+      PldFmap->Base = BlFmap->base;
+      PldFmap->Size = BlFmap->size;
+      CopyMem (&PldFmap->Name, &BlFmap->name, FMAP_STRLEN);
+
+      PldFmap->NumberOfAreas = BlFmap->nareas;
+      for (Index = 0; Index < BlFmap->nareas; Index++) {
+        PldFmap->Areas[Index].Offset = BlFmap->areas[Index].offset;
+        PldFmap->Areas[Index].Size = BlFmap->areas[Index].size;
+        CopyMem (&PldFmap->Areas[Index].Name, &BlFmap->areas[Index].name, FMAP_STRLEN);
+        PldFmap->Areas[Index].Flags = BlFmap->areas[Index].flags;
+      }
+
+      DEBUG ((DEBUG_INFO, "Created FMAP HOB\n"));
+    }
+  }
+
+  if ((BlSpiFlash == NULL) && (CbFmapRef == NULL)) {
+    return EFI_NOT_FOUND;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
   Parse and handle the misc info provided by bootloader
 
   @retval RETURN_SUCCESS           The misc information was parsed successfully.
@@ -595,6 +664,13 @@ ParseMiscInfo (
   VOID
   )
 {
+  EFI_STATUS  Status;
+
+  Status = ParseFlashInfo ();
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Unable to find SPI flash tables\n"));
+  }
+
   return RETURN_SUCCESS;
 }
 
