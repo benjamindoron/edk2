@@ -8,7 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#include <Library/SmmMemLib.h>
+#include <Library/MemLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include "FaultTolerantWrite.h"
 #include "FaultTolerantWriteSmmCommon.h"
@@ -31,7 +31,7 @@ FtwSmmIsBufferOutsideSmmValid (
   IN UINT64                Length
   )
 {
-  return TRUE;
+  return MmIsBufferOutsideMmValid (Buffer, Length);
 }
 
 /**

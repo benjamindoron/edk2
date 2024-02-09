@@ -71,6 +71,7 @@
   BaseMemoryLib
   DebugLib
   HobLib
+  MemLib
   MemoryAllocationLib
   MmServicesTableLib
   SafeIntLib

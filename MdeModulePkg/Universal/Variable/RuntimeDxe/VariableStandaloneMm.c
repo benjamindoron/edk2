@@ -8,6 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
+#include <Library/MemLib.h>
 #include "Variable.h"
 
 /**
@@ -28,7 +29,7 @@ VariableSmmIsBufferOutsideSmmValid (
   IN UINT64                Length
   )
 {
-  return TRUE;
+  return MmIsBufferOutsideMmValid (Buffer, Length);
 }
 
 /**

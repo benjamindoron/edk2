@@ -46,6 +46,7 @@
   BaseLib
   BaseMemoryLib
   DebugLib
+  MemLib
   MemoryAllocationLib
   MmServicesTableLib
   PcdLib
