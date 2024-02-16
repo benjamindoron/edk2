@@ -1,0 +1,27 @@
+## @file
+# Standalone MM Core Services Table Library.
+#
+# Copyright (c) 2023, 9elements GmbH<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = StandaloneMmCoreServicesTableLib
+  FILE_GUID                      = d8201999-90ba-4ff2-a323-e681a88a270f
+  MODULE_TYPE                    = MM_CORE_STANDALONE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MmServicesTableLib|MM_CORE_STANDALONE
+  PI_SPECIFICATION_VERSION       = 0x00010032
+  CONSTRUCTOR                    = StandaloneMmCoreServicesTableLibConstructor
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 ARM AARCH64
+#
+
+[Sources]
+  StandaloneMmCoreServicesTableLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
