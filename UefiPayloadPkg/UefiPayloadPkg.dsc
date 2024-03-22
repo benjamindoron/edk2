@@ -190,6 +190,7 @@
   DEFINE USE_CBMEM_FOR_CONSOLE        = FALSE
 
   DEFINE PERFORMANCE_MEASUREMENT_ENABLE = FALSE
+  DEFINE MEMORY_PROFILE_ENABLE          = FALSE
 
   #
   # Serial port set up
@@ -240,6 +241,11 @@
   GCC:*_*_X64_GENFW_FLAGS   = --keepexceptiontable
   INTEL:*_*_X64_GENFW_FLAGS = --keepexceptiontable
   MSFT:*_*_X64_GENFW_FLAGS  = --keepexceptiontable
+!endif
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MSFT:*_*_*_CC_FLAGS          = /Od
+  MSFT:RELEASE_*_*_DLINK_FLAGS = /DEBUG
+  MSFT:RELEASE_*_*_CC_FLAGS    = /Zi
 !endif
   *_*_*_CC_FLAGS                 = $(APPEND_CC_FLAGS)
 
@@ -534,7 +540,12 @@
   DxeHobListLib|UefiPayloadPkg/Library/DxeHobListLibNull/DxeHobListLibNull.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   HobLib|MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MemoryAllocationLib|MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationProfileLib.inf
+  MemoryProfileLib|MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationProfileLib.inf
+!else
   MemoryAllocationLib|MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf
+!endif
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/DxeDebugAgentLib.inf
@@ -548,7 +559,12 @@
 
 [LibraryClasses.common.DXE_DRIVER]
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MemoryAllocationLib|MdeModulePkg/Library/UefiMemoryAllocationProfileLib/UefiMemoryAllocationProfileLib.inf
+  MemoryProfileLib|MdeModulePkg/Library/UefiMemoryAllocationProfileLib/UefiMemoryAllocationProfileLib.inf
+!else
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+!endif
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
 !if $(SOURCE_DEBUG_ENABLE) == TRUE
   DebugAgentLib|SourceLevelDebugPkg/Library/DebugAgent/DxeDebugAgentLib.inf
@@ -572,7 +588,12 @@
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
 !endif
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MemoryAllocationLib|MdeModulePkg/Library/UefiMemoryAllocationProfileLib/UefiMemoryAllocationProfileLib.inf
+  MemoryProfileLib|MdeModulePkg/Library/UefiMemoryAllocationProfileLib/UefiMemoryAllocationProfileLib.inf
+!else
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+!endif
   ReportStatusCodeLib|MdeModulePkg/Library/RuntimeDxeReportStatusCodeLib/RuntimeDxeReportStatusCodeLib.inf
   VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
@@ -584,7 +605,12 @@
 
 [LibraryClasses.common.UEFI_DRIVER,LibraryClasses.common.UEFI_APPLICATION]
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MemoryAllocationLib|MdeModulePkg/Library/UefiMemoryAllocationProfileLib/UefiMemoryAllocationProfileLib.inf
+  MemoryProfileLib|MdeModulePkg/Library/UefiMemoryAllocationProfileLib/UefiMemoryAllocationProfileLib.inf
+!else
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+!endif
 !if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
 !endif
@@ -593,7 +619,12 @@
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   SmmServicesTableLib|MdeModulePkg/Library/PiSmmCoreSmmServicesTableLib/PiSmmCoreSmmServicesTableLib.inf
 
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MemoryAllocationLib|MdeModulePkg/Library/PiSmmCoreMemoryAllocationLib/PiSmmCoreMemoryAllocationProfileLib.inf
+  MemoryProfileLib|MdeModulePkg/Library/PiSmmCoreMemoryAllocationLib/PiSmmCoreMemoryAllocationProfileLib.inf
+!else
   MemoryAllocationLib|MdeModulePkg/Library/PiSmmCoreMemoryAllocationLib/PiSmmCoreMemoryAllocationLib.inf
+!endif
   SmmMemLib|MdePkg/Library/SmmMemLib/SmmMemLib.inf
   SmmCorePlatformHookLib|MdeModulePkg/Library/SmmCorePlatformHookLibNull/SmmCorePlatformHookLibNull.inf
   ReportStatusCodeLib|MdeModulePkg/Library/SmmReportStatusCodeLib/SmmReportStatusCodeLib.inf
@@ -606,7 +637,12 @@
   MmServicesTableLib|MdePkg/Library/MmServicesTableLib/MmServicesTableLib.inf
   SmmServicesTableLib|MdePkg/Library/SmmServicesTableLib/SmmServicesTableLib.inf
 
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MemoryAllocationLib|MdeModulePkg/Library/SmmMemoryAllocationProfileLib/SmmMemoryAllocationProfileLib.inf
+  MemoryProfileLib|MdeModulePkg/Library/SmmMemoryAllocationProfileLib/SmmMemoryAllocationProfileLib.inf
+!else
   MemoryAllocationLib|MdePkg/Library/SmmMemoryAllocationLib/SmmMemoryAllocationLib.inf
+!endif
   SmmMemLib|MdePkg/Library/SmmMemLib/SmmMemLib.inf
   SmmCpuPlatformHookLib|UefiCpuPkg/Library/SmmCpuPlatformHookLibNull/SmmCpuPlatformHookLibNull.inf
   SmmCpuFeaturesLib|UefiCpuPkg/Library/SmmCpuFeaturesLib/SmmCpuFeaturesLib.inf
@@ -730,6 +766,15 @@
     !else
       gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2B
     !endif
+  !endif
+!endif
+
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMemoryProfileMemoryType|0x0679
+  !if $(SMM_SUPPORT) == TRUE
+    gEfiMdeModulePkgTokenSpaceGuid.PcdMemoryProfilePropertyMask|0x03
+  !else
+    gEfiMdeModulePkgTokenSpaceGuid.PcdMemoryProfilePropertyMask|0x01
   !endif
 !endif
 
@@ -1499,5 +1544,9 @@
       ShellCEntryLib|ShellPkg/Library/UefiShellCEntryLib/UefiShellCEntryLib.inf
       ShellCommandLib|ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf
   }
+
+!if $(MEMORY_PROFILE_ENABLE) == TRUE
+  MdeModulePkg/Application/MemoryProfileInfo/MemoryProfileInfo.inf
+!endif
 
 !endif
