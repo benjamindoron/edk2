@@ -1257,6 +1257,8 @@
 
     <LibraryClasses>
       DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+      ShellProtocolInteractivityLib|ShellPkg/Library/UefiShellProtocolInteractivityLib/ShellProtocolInteractivityLib.inf
+      ShellProtocolsLib|ShellPkg/Library/UefiShellProtocolsLib/ShellProtocolsLib.inf
       HandleParsingLib|ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf
       OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
