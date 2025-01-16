@@ -268,6 +268,10 @@ ParseReservedMemory (
       BuildMemoryAllocationHob (StartAddress, NumberOfBytes, EfiMemoryMappedIO);
     } else {
       PropertyPtr = FdtGetProperty (Fdt, SubNode, "compatible", &TempLen);
+      if (PropertyPtr == NULL) {
+        goto FallbackType;
+      }
+
       TempStr     = (CHAR8 *)(PropertyPtr->Data);
       DEBUG ((DEBUG_INFO, "compatible:  %a\n", TempStr));
       if (AsciiStrnCmp (TempStr, "boot-code", AsciiStrLen ("boot-code")) == 0) {
@@ -314,6 +318,7 @@ ParseReservedMemory (
           SmbiosTable->SmBiosEntryPoint = (EFI_PHYSICAL_ADDRESS)(UINTN)(StartAddress);
         }
       } else {
+FallbackType:
         BuildMemoryAllocationHob (StartAddress, NumberOfBytes, EfiReservedMemoryType);
       }
     }
