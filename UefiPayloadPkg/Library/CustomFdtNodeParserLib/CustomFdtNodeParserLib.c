@@ -54,59 +54,71 @@ FitIsHobNeed (
   EFI_PEI_HOB_POINTERS  Hob
   )
 {
-  if (FixedPcdGetBool (PcdHandOffFdtEnable)) {
-    if (Hob.Header->HobType == EFI_HOB_TYPE_HANDOFF) {
+  //
+  // These HOBs are never needed.
+  //
+  if (Hob.Header->HobType == EFI_HOB_TYPE_HANDOFF) {
+    return FALSE;
+  }
+
+  //
+  // If handoff is in HOBs, then those not denied above are needed.
+  //
+  if (!FixedPcdGetBool (PcdHandOffFdtEnable)) {
+    return TRUE;
+  }
+
+  //
+  // This is a filtered allowlist. The pattern is a set of denials, falling back to permission.
+  //
+  if (Hob.Header->HobType == EFI_HOB_TYPE_MEMORY_ALLOCATION) {
+    if (CompareGuid (&Hob.MemoryAllocation->AllocDescriptor.Name, &gUniversalPayloadDeviceTreeGuid)) {
       return FALSE;
     }
 
-    if (Hob.Header->HobType == EFI_HOB_TYPE_MEMORY_ALLOCATION) {
-      if (CompareGuid (&Hob.MemoryAllocation->AllocDescriptor.Name, &gUniversalPayloadDeviceTreeGuid)) {
-        return FALSE;
-      }
-
-      if (CompareGuid (&Hob.MemoryAllocationModule->MemoryAllocationHeader.Name, &gEfiHobMemoryAllocModuleGuid)) {
-        return FALSE;
-      }
-
-      if ((Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiReservedMemoryType) ||
-          (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiBootServicesCode) ||
-          (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiBootServicesData) ||
-          (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiRuntimeServicesCode) ||
-          (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiRuntimeServicesData) ||
-          (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiACPIReclaimMemory) ||
-          (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiACPIMemoryNVS))
-      {
-        return FALSE;
-      }
+    if (CompareGuid (&Hob.MemoryAllocationModule->MemoryAllocationHeader.Name, &gEfiHobMemoryAllocModuleGuid)) {
+      return FALSE;
     }
 
-    if (Hob.Header->HobType == EFI_HOB_TYPE_RESOURCE_DESCRIPTOR) {
-      if (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
-        return FALSE;
-      }
+    if ((Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiReservedMemoryType) ||
+        (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiBootServicesCode) ||
+        (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiBootServicesData) ||
+        (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiRuntimeServicesCode) ||
+        (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiRuntimeServicesData) ||
+        (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiACPIReclaimMemory) ||
+        (Hob.MemoryAllocation->AllocDescriptor.MemoryType == EfiACPIMemoryNVS))
+    {
+      return FALSE;
     }
 
-    if (Hob.Header->HobType == EFI_HOB_TYPE_GUID_EXTENSION) {
-      if (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadSmbios3TableGuid)) {
-        return FALSE;
-      }
-
-      if (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadSerialPortInfoGuid)) {
-        return FALSE;
-      }
-
-      if (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadAcpiTableGuid)) {
-        return FALSE;
-      }
-
-      if (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadPciRootBridgeInfoGuid)) {
-        return FALSE;
-      }
-    }
+    // Arriving here means that the HOB is needed.
+    return TRUE;
   }
 
-  // Arrive here mean the HOB is need
-  return TRUE;
+  if (Hob.Header->HobType == EFI_HOB_TYPE_RESOURCE_DESCRIPTOR) {
+    if (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
+      return FALSE;
+    }
+
+    // Arriving here means that the HOB is needed.
+    return TRUE;
+  }
+
+  if (Hob.Header->HobType == EFI_HOB_TYPE_GUID_EXTENSION) {
+    if ((CompareGuid (&Hob.Guid->Name, &gUniversalPayloadSmbios3TableGuid)) ||
+        (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadSerialPortInfoGuid)) ||
+        (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadAcpiTableGuid)) ||
+        (CompareGuid (&Hob.Guid->Name, &gUniversalPayloadPciRootBridgeInfoGuid)))
+    {
+      return FALSE;
+    }
+
+    // Arriving here means that the HOB is needed.
+    return TRUE;
+  }
+
+  // All other HobTypes are denied by default.
+  return FALSE;
 }
 
 /**
