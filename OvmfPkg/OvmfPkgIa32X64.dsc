@@ -605,6 +605,9 @@
   gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmStackSize|0x4000
 !endif
 
+  # IRQs 5, 9, 10, 11 are level-triggered
+  gUefiOvmfPkgTokenSpaceGuid.Pcd8259LegacyModeEdgeLevel|0x0E20
+
   # Point to the MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
   gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0xdc, 0x5b, 0xc2, 0xee, 0xf2, 0x67, 0x95, 0x4d, 0xb1, 0xd5, 0xf8, 0x1b, 0x20, 0x39, 0xd1, 0x1d }
 
