@@ -29,6 +29,11 @@
   PCD_DYNAMIC_AS_DYNAMICEX            = TRUE
 
   #
+  # Set when these packages are available.
+  #
+  DEFINE USE_EDK2_PLATFORMS           = FALSE
+
+  #
   # Setup Universal Payload
   #
   # ELF: Build UniversalPayload file as UniversalPayload.elf
