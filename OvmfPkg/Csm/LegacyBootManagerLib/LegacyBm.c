@@ -1166,10 +1166,10 @@ LegacyBmPrintBbsTable (
       continue;
     }
 
+    DEBUG ((DEBUG_INFO, " %02x: ", Index));
     DEBUG (
       (DEBUG_INFO,
-       " %02x: %04x %02x/%02x/%02x %02x/%02x %04x %04x %04x:%04x %04x %04x\n",
-       (UINTN)Index,
+       "%04x %02x/%02x/%02x %02x/%02x %04x %04x %04x:%04x %04x %04x\n",
        (UINTN)LocalBbsTable[Index].BootPriority,
        (UINTN)LocalBbsTable[Index].Bus,
        (UINTN)LocalBbsTable[Index].Device,
