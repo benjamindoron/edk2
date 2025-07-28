@@ -59,6 +59,20 @@ BlDxeEntryPoint (
     ASSERT_EFI_ERROR (Status);
     Status = PcdSet64S (PcdPciExpressBaseSize, AcpiBoardInfo->PcieBaseSize);
     ASSERT_EFI_ERROR (Status);
+
+    //
+    // If we're doing light PCI enumeration, PciBusDxe won't advertise that it's complete.
+    // Since the bootloader did it, advertise it ourselves. This is necessary for VT-d.
+    //
+    if (PcdGetBool (PcdPciDisableBusEnumeration)) {
+      Status = gBS->InstallProtocolInterface (
+                      &ImageHandle,
+                      &gEfiPciEnumerationCompleteProtocolGuid,
+                      EFI_NATIVE_INTERFACE,
+                      NULL
+                      );
+      ASSERT_EFI_ERROR (Status);
+    }
   }
 
   Status = BlArchAdditionalOps (ImageHandle, SystemTable);
