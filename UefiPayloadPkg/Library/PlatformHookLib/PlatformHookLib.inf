@@ -23,7 +23,6 @@
   PcdLib
   BaseLib
   HobLib
-  DxeHobListLib
 
 [Packages]
   MdePkg/MdePkg.dec
