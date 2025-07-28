@@ -15,9 +15,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/VariableFormat.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/FirmwareVolumeBlock.h>
-#include <Library/UefiDriverEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -29,7 +26,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/VariableFlashInfoLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/HobLib.h>
-#include <Library/DxeServicesLib.h>
 #include <Guid/NvVariableInfoGuid.h>
 #include <Register/ArchitecturalMsr.h>
 
@@ -165,6 +161,12 @@ FvbProtocolEraseBlocks (
 EFI_FW_VOL_INSTANCE *
 GetFvbInstance (
   IN  UINTN  Instance
+  );
+
+EFI_STATUS
+GetInitialVariableData (
+  OUT VOID   **VarData,
+  OUT UINTN  *VarSize
   );
 
 EFI_STATUS
