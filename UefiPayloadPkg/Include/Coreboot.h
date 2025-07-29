@@ -418,11 +418,12 @@ struct cb_range {
   UINT32    range_size;
 } __attribute__ ((packed));
 
-#define CB_TAG_CFR_ROOT  0x0100
+#define CB_TAG_CFR_ROOT  0x0047
 struct cb_cfr {
   UINT32 tag;
   UINT32 size;
-  UINT32 checksum;  /* Of the entire structure with this field set to 0 */
+  UINT32 version;
+  UINT32 checksum;  /* Of the following data only; excludes these 3 fields */
   /* CFR_FORM forms[] */
 };
 

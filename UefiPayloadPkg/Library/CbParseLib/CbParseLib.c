@@ -80,6 +80,43 @@ CbCheckSum16 (
 }
 
 /**
+  Coreboot implements a CRC32 checksum which differs from the one in EDK2. This function
+  calculates the CRC32 checksum of a given buffer with the coreboot implementation.
+
+  @param  Buffer      The pointer to the buffer of which to calculate the CRC32.
+  @param  Length      The size, in bytes, of Buffer.
+
+  @return Crc         The CRC32 checksum of Buffer.
+
+**/
+UINT32
+CbCalculateCrc32 (
+  IN  VOID   *Buffer,
+  IN  UINTN  Length
+  )
+{
+  UINT32  Crc;
+  UINT8   *Ptr;
+  UINTN   Idx;
+  UINTN   BitIdx;
+
+  Crc = 0;
+  for (Idx = 0, Ptr = Buffer; Idx < Length; Idx++, Ptr++) {
+    Crc ^= (UINT32)*Ptr << 24;
+
+    for (BitIdx = 0; BitIdx < 8; BitIdx++) {
+      if ((Crc & 0x80000000UL) != 0) {
+        Crc = ((Crc << 1) ^ 0x04C11DB7UL);
+      } else {
+        Crc <<= 1;
+      }
+    }
+  }
+
+  return Crc;
+}
+
+/**
   Check the coreboot table if it is valid.
 
   @param  Header            Pointer to coreboot table
@@ -656,7 +693,10 @@ ParseFlashInfo (
   Parse coreboot's CFR info
 
   @retval RETURN_SUCCESS               The misc information was parsed successfully.
+  @retval RETURN_INCOMPATIBLE_VERSION  The provided CFR data does not match the expected version.
+  @retval RETURN_CRC_ERROR             The calculated checksum does not match the supplied one.
   @retval RETURN_NOT_FOUND             Could not find required misc info.
+  @retval RETURN_OUT_OF_RESOURCES      Insufficant memory space.
 
 **/
 RETURN_STATUS
@@ -665,7 +705,6 @@ ParseCfrInfo (
   )
 {
   struct cb_cfr    *CbCfrSetupMenu;
-  UINT32           CbCfrChecksum;
   UINT32           CfrCalculatedChecksum;
   UINTN            ProcessedLength;
   CFR_OPTION_FORM  *CbCfrOuterFormOffset;
@@ -682,16 +721,18 @@ ParseCfrInfo (
     return RETURN_NOT_FOUND;
   }
 
-  //
-  // Checksums with this field set to "0"
-  //
-  CbCfrChecksum = CbCfrSetupMenu->checksum;
-  CbCfrSetupMenu->checksum = 0;
-  CfrCalculatedChecksum = CalculateCrc32 (CbCfrSetupMenu, CbCfrSetupMenu->size);
-  CbCfrSetupMenu->checksum = CbCfrChecksum;
+  if (CbCfrSetupMenu->version != CB_CFR_VERSION) {
+    DEBUG ((DEBUG_WARN, "CFR: version mismatch! (expected %d, got %d)\n", CB_CFR_VERSION, CbCfrSetupMenu->version));
+    return RETURN_INCOMPATIBLE_VERSION;
+  }
 
-  if (CfrCalculatedChecksum != CbCfrChecksum) {
-    DEBUG ((DEBUG_WARN, "CFR: Calculated CRC32 0x%x does not match stored CRC32 0x%x!\n", CfrCalculatedChecksum, CbCfrChecksum));
+  //
+  // Checksum over CFR_FORM[] data  -- CbCfrSetupMenu header excluded
+  //
+  CfrCalculatedChecksum = CbCalculateCrc32 (CbCfrSetupMenu + 1, CbCfrSetupMenu->size - sizeof(*CbCfrSetupMenu));
+  if (CfrCalculatedChecksum != CbCfrSetupMenu->checksum) {
+    DEBUG ((DEBUG_WARN, "CFR: Calculated CRC32 0x%x does not match stored CRC32 0x%x!\n", CfrCalculatedChecksum, CbCfrSetupMenu->checksum));
+    return RETURN_CRC_ERROR;
   }
 
   ProcessedLength = sizeof (struct cb_cfr);
@@ -701,6 +742,11 @@ ParseCfrInfo (
   //
   while (ProcessedLength < CbCfrSetupMenu->size) {
     CbCfrOuterFormOffset = (CFR_OPTION_FORM *)((UINT8 *)CbCfrSetupMenu + ProcessedLength);
+    if (CbCfrOuterFormOffset->tag != CB_TAG_CFR_OPTION_FORM) {
+      DEBUG ((DEBUG_ERROR, "CFR tag mismatch: 0x%x vs 0x%x\n", CbCfrOuterFormOffset->tag, CB_TAG_CFR_OPTION_FORM));
+      return RETURN_NOT_FOUND;
+    }
+
     CfrSetupMenuForm = BuildGuidDataHob (
                           &gEfiCfrSetupMenuFormGuid,
                           CbCfrOuterFormOffset,
@@ -714,8 +760,7 @@ ParseCfrInfo (
     CfrFormName = (CFR_VARBINARY *)((UINT8 *)CfrSetupMenuForm + sizeof (CFR_OPTION_FORM));
     DEBUG ((
       DEBUG_INFO,
-      "CFR: Found form[%d] \"%a\" of %d bytes\n",
-      CfrSetupMenuForm->object_id,
+      "CFR: Found form \"%a\", size 0x%x bytes\n",
       CfrFormName->data,
       CfrSetupMenuForm->size
       ));
