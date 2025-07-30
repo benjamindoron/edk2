@@ -225,9 +225,6 @@
   CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096
   MSFT:*_*_*_DLINK_FLAGS     = /ALIGN:4096
 
-[BuildOptions.IA32.EDKII.DXE_RUNTIME_DRIVER, BuildOptions.X64.EDKII.DXE_RUNTIME_DRIVER]
-  GCC:*_*_*_DLINK_FLAGS      = -z common-page-size=0x1000
-
 [BuildOptions.AARCH64.EDKII.DXE_RUNTIME_DRIVER]
   GCC:*_*_*_DLINK_FLAGS      = -z common-page-size=0x10000
 
