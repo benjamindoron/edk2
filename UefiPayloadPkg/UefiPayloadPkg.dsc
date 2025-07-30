@@ -28,39 +28,6 @@
   FLASH_DEFINITION                    = UefiPayloadPkg/UefiPayloadPkg.fdf
   PCD_DYNAMIC_AS_DYNAMICEX            = TRUE
 
-  DEFINE SOURCE_DEBUG_ENABLE          = FALSE
-  DEFINE PS2_KEYBOARD_ENABLE          = FALSE
-  DEFINE RAM_DISK_ENABLE              = FALSE
-  DEFINE SIO_BUS_ENABLE               = FALSE
-  DEFINE SECURITY_STUB_ENABLE         = TRUE
-  DEFINE SMM_SUPPORT                  = FALSE
-  DEFINE PLATFORM_BOOT_TIMEOUT        = 3
-  DEFINE BOOT_MANAGER_ESCAPE          = FALSE
-  DEFINE ATA_ENABLE                   = TRUE
-  DEFINE SD_ENABLE                    = TRUE
-  DEFINE PS2_MOUSE_ENABLE             = TRUE
-  DEFINE SD_MMC_TIMEOUT               = 1000000
-  DEFINE USE_CBMEM_FOR_CONSOLE        = FALSE
-  DEFINE BOOTSPLASH_IMAGE             = FALSE
-  DEFINE NVME_ENABLE                  = TRUE
-  DEFINE LOCKBOX_SUPPORT              = FALSE
-  DEFINE LOAD_OPTION_ROMS             = FALSE
-
-  #
-  # Capsule updates
-  #
-  # CAPSULE_MAIN_FW_GUID specifies GUID to be used by FmpDxe when
-  # CAPSULE_SUPPORT is set to TRUE
-  #
-  DEFINE CAPSULE_SUPPORT              = FALSE
-  DEFINE CAPSULE_MAIN_FW_GUID         =
-
-  #
-  # Crypto Support
-  #
-  DEFINE CRYPTO_PROTOCOL_SUPPORT        = FALSE
-  DEFINE CRYPTO_DRIVER_EXTERNAL_SUPPORT = FALSE
-
   #
   # Setup Universal Payload
   #
@@ -71,10 +38,13 @@
   DEFINE UNIVERSAL_PAYLOAD_FORMAT     = ELF
 
   #
-  # NULL:    NullMemoryTestDxe
-  # GENERIC: GenericMemoryTestDxe
+  # Flat DeviceTree handoff option
   #
-  DEFINE MEMORY_TEST                  = NULL
+  # FALSE: Handover HobList to Payload
+  # TRUE:  Handover FDT to Payload
+  #
+  DEFINE HAND_OFF_FDT_ENABLE          = FALSE
+
   #
   # SBL:      UEFI payload for Slim Bootloader
   # COREBOOT: UEFI payload for coreboot
@@ -82,14 +52,121 @@
   DEFINE   BOOTLOADER                 = SBL
 
   #
+  # Architectural drivers
+  #
+  DEFINE SMM_SUPPORT                  = FALSE
+  DEFINE DISABLE_RESET_SYSTEM         = FALSE
+
+  #
+  # EMU:      UEFI payload with EMU variable
+  # SPI:      UEFI payload with SPI NV variable support
+  # SMMSTORE: UEFI payload with coreboot SMM NV variable support
+  # NONE:     UEFI payload with no variable modules
+  #
+  DEFINE VARIABLE_SUPPORT             = EMU
+
+  #
+  # Capsule updates
+  #
+  # CAPSULE_MAIN_FW_GUID specifies GUID to be used by FmpDxe when
+  # CAPSULE_SUPPORT is set to TRUE
+  #
+  DEFINE CAPSULE_SUPPORT              = FALSE
+  DEFINE CAPSULE_MAIN_FW_GUID         =
+
+  # Define the maximum size of the capsule image without a reset flag that the platform can support.
+  DEFINE MAX_SIZE_NON_POPULATE_CAPSULE = 0xa00000
+
+  #
+  # Crypto Support
+  #
+  DEFINE CRYPTO_PROTOCOL_SUPPORT        = FALSE
+  DEFINE CRYPTO_DRIVER_EXTERNAL_SUPPORT = FALSE
+
+  #
+  # Security options
+  #
+  DEFINE SECURITY_STUB_ENABLE         = TRUE
+  DEFINE SECURE_BOOT_ENABLE           = FALSE
+
+  #
+  # Miscellaneous drivers
+  #
+  DEFINE LOCKBOX_SUPPORT              = FALSE
+  DEFINE RAM_DISK_ENABLE              = FALSE
+
+  #
+  # NULL:    NullMemoryTestDxe
+  # GENERIC: GenericMemoryTestDxe
+  #
+  DEFINE MEMORY_TEST                  = NULL
+
+  #
+  # User interface options
+  #
+  DEFINE BOOTSPLASH_IMAGE             = FALSE
+  DEFINE BOOT_MANAGER_ESCAPE          = FALSE
+  DEFINE PLATFORM_BOOT_TIMEOUT        = 3
+
+  #
+  # Shell options: [BUILD_SHELL, MIN_BIN, NONE, UEFI_BIN]
+  #
+  DEFINE SHELL_TYPE                   = BUILD_SHELL
+
+  #
   # CPU options
   #
   DEFINE MAX_LOGICAL_PROCESSORS       = 1024
+
+  # For recent X86 CPU, 0x15 CPUID instruction will return Time Stamp Counter Frequence.
+  # This is how BaseCpuTimerLib works, and a recommended way to get Frequence, so set the default value as TRUE.
+  # Note: for emulation platform such as QEMU, this may not work and should set it as FALSE
+  DEFINE CPU_TIMER_LIB_ENABLE         = TRUE
+
+  #
+  # HPET:  UEFI Payload will use HPET timer
+  # LAPIC: UEFI Payload will use local APIC timer
+  #
+  DEFINE TIMER_SUPPORT                = HPET
 
   #
   # PCI options
   #
   DEFINE PCIE_BASE_SUPPORT            = TRUE
+  DEFINE LOAD_OPTION_ROMS             = FALSE
+
+  #
+  # Storage options
+  #
+  DEFINE ATA_ENABLE                   = TRUE
+  DEFINE NVME_ENABLE                  = TRUE
+  DEFINE SD_ENABLE                    = TRUE
+  DEFINE SD_MMC_TIMEOUT               = 1000000
+
+  #
+  # UEFI network modules
+  #
+  DEFINE NETWORK_DRIVER_ENABLE = FALSE
+
+  #
+  # PS/2 options
+  #
+  DEFINE SIO_BUS_ENABLE               = FALSE
+  DEFINE PS2_KEYBOARD_ENABLE          = FALSE
+  DEFINE PS2_MOUSE_ENABLE             = TRUE
+
+  # Define RTC related register.
+  DEFINE RTC_INDEX_REGISTER  = 0x70
+  DEFINE RTC_TARGET_REGISTER = 0x71
+
+  #
+  # Debug options
+  #
+  DEFINE SOURCE_DEBUG_ENABLE          = FALSE
+  DEFINE MULTIPLE_DEBUG_PORT_SUPPORT  = FALSE
+  DEFINE USE_CBMEM_FOR_CONSOLE        = FALSE
+
+  DEFINE PERFORMANCE_MEASUREMENT_ENABLE = FALSE
 
   #
   # Serial port set up
@@ -106,7 +183,9 @@
   DEFINE UART_DEFAULT_STOP_BITS       = 1
   DEFINE DEFAULT_TERMINAL_TYPE        = 0
 
-  # Enabling the serial terminal will slow down the boot menu redering!
+  DEFINE SERIAL_DRIVER_ENABLE         = TRUE
+
+  # Enabling the serial terminal will slow down the boot menu rendering!
   DEFINE DISABLE_SERIAL_TERMINAL      = FALSE
 
   #
@@ -126,58 +205,6 @@
   #
   #                                       [Vendor]   [Device]  [----ClockRate---]  [------------Offset-----------] [Bar] [Stride] [RxFifo] [TxFifo]   [Rsvd]   [Vendor]
   DEFINE PCI_SERIAL_PARAMETERS        = {0xff,0xff, 0x00,0x00, 0x0,0x20,0x1c,0x00, 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0, 0x00,    0x01, 0x0,0x0, 0x0,0x0, 0x0,0x0, 0xff,0xff}
-
-  #
-  # Shell options: [BUILD_SHELL, MIN_BIN, NONE, UEFI_BIN]
-  #
-  DEFINE SHELL_TYPE                   = BUILD_SHELL
-
-  #
-  # EMU:      UEFI payload with EMU variable
-  # SPI:      UEFI payload with SPI NV variable support
-  # SMMSTORE: UEFI payload with coreboot SMM NV variable support
-  # NONE:     UEFI payload with no variable modules
-  #
-  DEFINE VARIABLE_SUPPORT      = EMU
-
-  DEFINE DISABLE_RESET_SYSTEM  = FALSE
-  DEFINE NETWORK_DRIVER_ENABLE = FALSE
-
-  # Dfine the maximum size of the capsule image without a reset flag that the platform can support.
-  DEFINE MAX_SIZE_NON_POPULATE_CAPSULE = 0xa00000
-
-  # Define RTC related register.
-  DEFINE RTC_INDEX_REGISTER = 0x70
-  DEFINE RTC_TARGET_REGISTER = 0x71
-
-  DEFINE SERIAL_DRIVER_ENABLE = TRUE
-  DEFINE PERFORMANCE_MEASUREMENT_ENABLE  = FALSE
-
-  # For recent X86 CPU, 0x15 CPUID instruction will return Time Stamp Counter Frequence.
-  # This is how BaseCpuTimerLib works, and a recommended way to get Frequence, so set the default value as TRUE.
-  # Note: for emulation platform such as QEMU, this may not work and should set it as FALSE
-  DEFINE CPU_TIMER_LIB_ENABLE  = TRUE
-
-  #
-  # HPET:  UEFI Payload will use HPET timer
-  # LAPIC: UEFI Payload will use local APIC timer
-  #
-  DEFINE TIMER_SUPPORT      = HPET
-
-  DEFINE MULTIPLE_DEBUG_PORT_SUPPORT = FALSE
-
-  #
-  # Security
-  #
-  DEFINE SECURE_BOOT_ENABLE       = FALSE
-
-  #
-  # Flat DeviceTree handoff option:
-  #   FALSE: Handover HobList to Payload
-  #   TRUE:  Handover FDT to Payload
-  #
-  #
-  HAND_OFF_FDT_ENABLE       = FALSE
 
 [BuildOptions]
   *_*_*_CC_FLAGS                 = -D DISABLE_NEW_DEPRECATED_INTERFACES
@@ -917,9 +944,9 @@
   !endif
 !endif
 
-#
-# UEFI network modules
-#
+  #
+  # UEFI network modules
+  #
 !if $(NETWORK_DRIVER_ENABLE) == TRUE
 [Defines]
   DEFINE PLATFORMX64_ENABLE = TRUE
