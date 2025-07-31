@@ -611,7 +611,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|$(CAPSULE_SUPPORT)
 
 [PcdsFeatureFlag.X64]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdDxeIplSwitchToLongMode|TRUE
   gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmEnableBspElection|FALSE
 
 [PcdsFixedAtBuild]
@@ -628,17 +627,18 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdVpdBaseAddress|0x0
   gEfiMdeModulePkgTokenSpaceGuid.PcdStatusCodeUseMemory|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdUse1GPageTable|TRUE
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmStackSize|0x4000
   gUefiPayloadPkgTokenSpaceGuid.PcdHandOffFdtEnable|$(HAND_OFF_FDT_ENABLE)
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0x21, 0xaa, 0x2c, 0x46, 0x14, 0x76, 0x03, 0x45, 0x83, 0x6e, 0x8a, 0xb6, 0xf4, 0x66, 0x23, 0x31 }
   gUefiPayloadPkgTokenSpaceGuid.PcdPcdDriverFile|{ 0x57, 0x72, 0xcf, 0x80, 0xab, 0x87, 0xf9, 0x47, 0xa3, 0xfe, 0xD5, 0x0B, 0x76, 0xd8, 0x95, 0x41 }
 
-!if $(SOURCE_DEBUG_ENABLE)
+!if $(SOURCE_DEBUG_ENABLE) == TRUE
   gEfiSourceLevelDebugPkgTokenSpaceGuid.PcdDebugLoadImageMethod|0x2
 !endif
-  gUefiCpuPkgTokenSpaceGuid.PcdCpuSmmStackSize|0x4000
+
   gEfiMdeModulePkgTokenSpaceGuid.PcdEdkiiFpdtStringRecordEnableOnly| TRUE
-!if $(PERFORMANCE_MEASUREMENT_ENABLE)
+!if $(PERFORMANCE_MEASUREMENT_ENABLE) == TRUE
   gEfiMdePkgTokenSpaceGuid.PcdPerformanceLibraryPropertyMask       | 0x1
 !endif
   gEfiMdeModulePkgTokenSpaceGuid.PcdSdMmcGenericTimeoutValue|$(SD_MMC_TIMEOUT)
@@ -675,7 +675,6 @@
 !endif
 !endif
 
-
 !if $(SECURE_BOOT_ENABLE) == TRUE
   # Override the default values from SecurityPkg to ensure images from all sources are verified in secure boot
   gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy|0x04
@@ -684,15 +683,6 @@
 !endif
 
 [PcdsFixedAtBuild.AARCH64]
-  # System Memory Base -- fixed at 0x4000_0000
-  gArmTokenSpaceGuid.PcdSystemMemoryBase|0x40000000
-
-  gArmPlatformTokenSpaceGuid.PcdCPUCoresStackBase|0x4007c000
-  gArmPlatformTokenSpaceGuid.PcdCPUCorePrimaryStackSize|0x4000
-
-  # Size of the region used by UEFI in permanent memory (Reserved 64MB)
-  gArmPlatformTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x04000000
-
   # ARM General Interrupt Controller
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x8000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x80a0000
@@ -703,55 +693,28 @@
   # (i.e., GRUB) may assume that its contents are executable.
   gEfiMdeModulePkgTokenSpaceGuid.PcdDxeNxMemoryProtectionPolicy|0xC000000000007FD1
 
-  # initial location of the device tree blob passed by QEMU -- base of DRAM
-  gUefiOvmfPkgTokenSpaceGuid.PcdDeviceTreeInitialBaseAddress|0x40000000
-
-  # The maximum physical I/O addressability of the processor, set with BuildCpuHob().
-  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|16
-
   # Enable the non-executable DXE stack. (This gets set up by DxeIpl)
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack|TRUE
-
-  # Shadowing PEI modules is absolutely pointless when the NOR flash is emulated
-  gEfiMdeModulePkgTokenSpaceGuid.PcdShadowPeimOnBoot|FALSE
-
-  # System Memory Size -- 128 MB initially, actual size will be fetched from DT
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0x8000000
-
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize   | 0x40000
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize   | 0x40000
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize | 0x40000
-
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|TRUE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x9000000
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
-  gEfiMdeModulePkgTokenSpaceGuid.PcdPciSerialParameters|$(PCI_SERIAL_PARAMETERS)
-
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosEntryPointProvideMethod|0x2
 
   # AARCH64 use PL011 Serial Port device instead of UniversalPayload Serial
   gUefiPayloadPkgTokenSpaceGuid.PcdUseUniversalPayloadSerialPort|FALSE
 
-[PcdsPatchableInModule.IA32, PcdsPatchableInModule.X64]
+  # ARM on QEMU platform
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize   | 0x40000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize   | 0x40000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize | 0x40000
+
+[PcdsPatchableInModule]
 !if $(NETWORK_DRIVER_ENABLE) == TRUE
   gEfiNetworkPkgTokenSpaceGuid.PcdAllowHttpConnections|TRUE
 !endif
   gUefiPayloadPkgTokenSpaceGuid.SizeOfIoSpace|16
   gUefiPayloadPkgTokenSpaceGuid.PcdFDTPageSize|8
-  #
-  # The following parameters are set by Library/PlatformHookLib
-  #
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|FALSE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x3F8
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate|$(BAUD_RATE)
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
 
-[PcdsPatchableInModule.common]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdBootManagerMenuFile|{ 0x21, 0xaa, 0x2c, 0x46, 0x14, 0x76, 0x03, 0x45, 0x83, 0x6e, 0x8a, 0xb6, 0xf4, 0x66, 0x23, 0x31 }
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x7
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000004F
 !if $(USE_CBMEM_FOR_CONSOLE) == FALSE
-  !if $(SOURCE_DEBUG_ENABLE)
+  !if $(SOURCE_DEBUG_ENABLE) == TRUE
     gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x17
   !else
     gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2F
@@ -780,19 +743,20 @@
   gUefiCpuPkgTokenSpaceGuid.PcdCpuNumberOfReservedVariableMtrrs|0
   gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter|0
 
-[PcdsPatchableInModule.AARCH64]
-  gUefiPayloadPkgTokenSpaceGuid.SizeOfIoSpace|16
-  gUefiPayloadPkgTokenSpaceGuid.PcdFDTPageSize|8
-
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|TRUE
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x9000000
+[PcdsPatchableInModule.IA32, PcdsPatchableInModule.X64]
+  #
+  # The following parameters are set by Library/PlatformHookLib
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x3F8
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate|$(BAUD_RATE)
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
 
-!if $(TARGET) == DEBUG
-   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x07
-!else
-   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x03
-!endif
+[PcdsPatchableInModule.AARCH64]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x9000000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate|$(BAUD_RATE)
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
 
 ################################################################################
 #
