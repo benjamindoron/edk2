@@ -763,7 +763,6 @@
 # Pcd DynamicEx Section - list of all EDK II PCD Entries defined by this Platform
 #
 ################################################################################
-
 [PcdsDynamicHii]
   gEfiMdePkgTokenSpaceGuid.PcdPlatformBootTimeOut|L"Timeout"|gEfiGlobalVariableGuid|0x0|$(PLATFORM_BOOT_TIMEOUT)
 
@@ -793,8 +792,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize  |0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize|0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize  |0
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase  |0
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64|0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase64|0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase64|0
 !endif
@@ -832,12 +829,8 @@
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits|$(UART_DEFAULT_STOP_BITS)
 
 [PcdsDynamicExDefault.AARCH64]
-
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase     | 0
+  # ARM on QEMU platform
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase64   | 0
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64   | 0
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase     | 0
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase   | 0
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase64 | 0
 
   # Timer IRQs
