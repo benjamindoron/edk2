@@ -823,7 +823,6 @@
       UefiPayloadPkg/UefiPayloadEntry/FitUniversalPayloadEntry.inf {
         <LibraryClasses>
           !if gUefiPayloadPkgTokenSpaceGuid.PcdHandOffFdtEnable == TRUE
-            FdtLib|MdePkg/Library/BaseFdtLib/BaseFdtLib.inf
             CustomFdtNodeParserLib|UefiPayloadPkg/Library/CustomFdtNodeParserLib/CustomFdtNodeParserLib.inf
             NULL|UefiPayloadPkg/Library/FdtParserLib/FdtParseLib.inf
           !endif
@@ -844,7 +843,6 @@
       UefiPayloadPkg/UefiPayloadEntry/FitUniversalPayloadEntry.inf {
         <LibraryClasses>
           !if gUefiPayloadPkgTokenSpaceGuid.PcdHandOffFdtEnable == TRUE
-            FdtLib|MdePkg/Library/BaseFdtLib/BaseFdtLib.inf
             CustomFdtNodeParserLib|UefiPayloadPkg/Library/CustomFdtNodeParserLib/CustomFdtNodeParserLib.inf
             NULL|UefiPayloadPkg/Library/FdtParserLib/FdtParseLib.inf
           !endif
@@ -932,7 +930,6 @@
   }
   MdeModulePkg/Universal/EsrtDxe/EsrtDxe.inf
 !endif
-
 
   MdeModulePkg/Universal/Metronome/Metronome.inf
   MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
