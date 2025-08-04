@@ -218,7 +218,7 @@
 [BuildOptions.AARCH64]
   GCC:*_*_*_CC_FLAGS         = -mcmodel=tiny -mstrict-align
 
-[BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
+[BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER, BuildOptions.common.EDKII.SMM_CORE, BuildOptions.common.EDKII.DXE_SMM_DRIVER]
   GCC:*_*_*_DLINK_FLAGS      = -z common-page-size=0x1000
   XCODE:*_*_*_DLINK_FLAGS    = -seg1addr 0x1000 -segalign 0x1000
   XCODE:*_*_*_MTOC_FLAGS     = -align 0x1000
