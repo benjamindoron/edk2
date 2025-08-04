@@ -682,12 +682,6 @@
   gEfiSecurityPkgTokenSpaceGuid.PcdRemovableMediaImageVerificationPolicy|0x04
 !endif
 
-[PcdsFixedAtBuild.AARCH64]
-  # ARM General Interrupt Controller
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0x8000000
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x80a0000
-  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0x8080000
-
   # Enable NX memory protection for all non-code regions, including OEM and OS
   # reserved ones, with the exception of LoaderData regions, of which OS loaders
   # (i.e., GRUB) may assume that its contents are executable.
@@ -695,6 +689,12 @@
 
   # Enable the non-executable DXE stack. (This gets set up by DxeIpl)
   gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack|TRUE
+
+[PcdsFixedAtBuild.AARCH64]
+  # ARM General Interrupt Controller
+  gArmTokenSpaceGuid.PcdGicDistributorBase|0x8000000
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x80a0000
+  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0x8080000
 
   # AARCH64 use PL011 Serial Port device instead of UniversalPayload Serial
   gUefiPayloadPkgTokenSpaceGuid.PcdUseUniversalPayloadSerialPort|FALSE
