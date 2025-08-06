@@ -199,9 +199,9 @@ struct cb_forward {
   UINT64    forward;
 };
 
+// Large objects are stored elsewhere and referenced in the CBTABLE.
 struct cb_cbmem_ref {
   UINT32    tag;
-  // Field contains size of this struct == 0x0010
   UINT32    size;
   UINT64    cbmem_addr;
 };
