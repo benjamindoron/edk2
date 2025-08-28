@@ -361,7 +361,7 @@
   FrameBufferBltLib|MdeModulePkg/Library/FrameBufferBltLib/FrameBufferBltLib.inf
   ResetSystemLib|UefiPayloadPkg/Library/ResetSystemLib/ResetSystemLib.inf
 !if $(USE_CBMEM_FOR_CONSOLE) == TRUE
-  SerialPortLib|UefiPayloadPkg/Library/CbSerialPortLib/CbSerialPortLib.inf
+  SerialPortLib|UefiPayloadPkg/CbStatusCodeHandler/Library/CbSerialPortLib/CbSerialPortLib.inf
   PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
 !else
   !if $(MULTIPLE_DEBUG_PORT_SUPPORT) == TRUE
