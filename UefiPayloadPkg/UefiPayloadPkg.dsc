@@ -66,6 +66,12 @@
   DEFINE VARIABLE_SUPPORT             = EMU
 
   #
+  # INTEL: SPI flash support using Intel's hardware sequencing
+  # QEMU:  SPI flash support using QEMU's flash devices
+  #
+  DEFINE SPI_FLASH_SUPPORT            = INTEL
+
+  #
   # Capsule updates
   #
   # CAPSULE_MAIN_FW_GUID specifies GUID to be used by FmpDxe when
@@ -552,7 +558,11 @@
   PerformanceLib|MdeModulePkg/Library/SmmPerformanceLib/SmmPerformanceLib.inf
 !endif
 !if $(VARIABLE_SUPPORT) == "SPI"
+!if $(SPI_FLASH_SUPPORT) == "INTEL"
   SpiFlashLib|UefiPayloadPkg/Library/SpiFlashLib/SpiFlashLib.inf
+!elseif $(SPI_FLASH_SUPPORT) == "QEMU"
+  SpiFlashLib|UefiPayloadPkg/Library/SpiFlashLibQemu/SpiFlashLibQemu.inf
+!endif
   FlashDeviceLib|UefiPayloadPkg/Library/FlashDeviceLib/FlashDeviceLib.inf
   BaseCryptLib|CryptoPkg/Library/BaseCryptLib/SmmCryptLib.inf
 !endif
