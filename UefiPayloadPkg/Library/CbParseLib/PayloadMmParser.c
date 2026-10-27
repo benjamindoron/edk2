@@ -354,7 +354,6 @@ ParsePayloadMmFeatureInfo (
   EFI_SMRAM_HOB_DESCRIPTOR_BLOCK        *PldSmramHob;
   struct cb_payload_mm_shared_mem       *BlMmSharedMem;
   PLD_S3_COMMUNICATION                  *PldMmSharedMem;
-  struct cb_pld_mm_spi_controller_info  *BlSpiFlashInfo;
   SPI_FLASH_INFO                        *PldSpiFlashInfo;
   EFI_STATUS                            Status;
   EFI_HOB_GUID_TYPE                     *GuidHob;
@@ -413,24 +412,8 @@ ParsePayloadMmFeatureInfo (
     }
   }
 
-  BlSpiFlashInfo = FindCbTag (CB_TAG_PLD_MM_SPI_CONTROLLER_INFO);
-  if (BlSpiFlashInfo != NULL) {
-    PldSpiFlashInfo = BuildGuidHob (&gSpiFlashInfoGuid, sizeof (SPI_FLASH_INFO));
-    if (PldSpiFlashInfo != NULL) {
-      PldSpiFlashInfo->Revision = BlSpiFlashInfo->revision;
-      PldSpiFlashInfo->Flags = BlSpiFlashInfo->flags;
-
-      PldSpiFlashInfo->SpiAddress.AddressSpaceId = BlSpiFlashInfo->spi_address.address_space_id;
-      PldSpiFlashInfo->SpiAddress.RegisterBitWidth = BlSpiFlashInfo->spi_address.register_bit_width;
-      PldSpiFlashInfo->SpiAddress.RegisterBitOffset = BlSpiFlashInfo->spi_address.register_bit_offset;
-      PldSpiFlashInfo->SpiAddress.Address = cb_unpack64 (BlSpiFlashInfo->spi_address.address);
-
-      // Required for UefiPayload implementation compatibility
-      PldSpiFlashInfo->SpiAddress.AccessSize = EFI_ACPI_3_0_DWORD;
-
-      DEBUG ((DEBUG_INFO, "Created SPI flash info HOB\n"));
-    }
-  }
+  Status = ProbeSpiController (&PldSpiFlashInfo);
+  ASSERT_EFI_ERROR (Status);
 
   // TODO: Split this code block out into another function?
   if (BlMmInfo != NULL) {
@@ -465,7 +448,7 @@ ParsePayloadMmFeatureInfo (
     // Unblock the SPI controller and related elements.
     // - FIXME: Again, is this optimal?
     //
-    if (BlSpiFlashInfo != NULL && PldSpiFlashInfo != NULL) {
+    if (PldSpiFlashInfo != NULL) {
       Status = MmUnblockMemoryRequest (PldSpiFlashInfo->SpiAddress.Address, EFI_SIZE_TO_PAGES (256));
       ASSERT_EFI_ERROR (Status);
 

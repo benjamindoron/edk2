@@ -23,6 +23,7 @@
 [Sources]
   CbParseLib.c
   PayloadMmParser.c
+  SpiControllerProber.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -35,7 +36,7 @@
   BaseMemoryLib
   DebugLib
   PcdLib
-  HobLib
+  PciLib
   PrintLib
   HobLib
   FmapParserLib
@@ -56,4 +57,5 @@
 
 [Pcd]
   gUefiPayloadPkgTokenSpaceGuid.PcdBootloaderParameter
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
   gEfiMdeModulePkgTokenSpaceGuid.PcdMmCommBufferPages
